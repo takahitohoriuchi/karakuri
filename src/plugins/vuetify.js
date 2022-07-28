@@ -8,8 +8,7 @@ export default new Vuetify({
 		themes: {
 			light: {
 				// appbaeとかに使われてる色 （ひとまず青）
-				primary: '#89d2ca',
-				//
+				primary: '#21ed69',
 				secondary: '#d2bc40',
 				accent: '#dc395f',
 				error: '#ffeb3b',

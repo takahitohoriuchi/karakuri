@@ -1,37 +1,16 @@
 <template>
 	<v-app>
-		<v-app-bar app color="primary" dark>
+		<v-app-bar app color="#bdbdbd" dark>
 			<div class="d-flex align-center">
-				<v-img
-					alt="Vuetify Logo"
-					class="shrink mr-2"
-					contain
-					src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-					transition="scale-transition"
-					width="40"
-				/>
-
-				<v-img
-					alt="Vuetify Name"
-					class="shrink mt-1 hidden-sm-and-down"
-					contain
-					min-width="100"
-					src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-					width="100"
-				/>
+				<v-app-bar-title>身体運動表情を・・・</v-app-bar-title>
+				<!-- ここにv-imgでロゴ -->
 			</div>
-
 			<v-spacer></v-spacer>
-
-			<v-btn href="https://github.com/vuetifyjs/vuetify/releases/latest" target="_blank" text>
-				<span class="mr-2">Latest Release</span>
-				<v-icon>mdi-open-in-new</v-icon>
-			</v-btn>
 		</v-app-bar>
 
 		<v-main>
 			<!-- SECTION:ナビゲーション -->
-			<nav><router-link to="/"> HOME </router-link> | <router-link to="/about"> ABOUT </router-link> |</nav>
+			<nav><router-link to="/"> HOME </router-link> | <router-link to="/loader"> 読み込みビュー </router-link> | <router-link to="/play"> 再生ビュー </router-link> |</nav> 
 			<!-- SECTION:ナビゲーション -->
 
 			<router-view />
@@ -57,7 +36,7 @@ export default {
 }
 
 #app {
-	font-family: Avenir, Helvetica, Arial, sans-serif;
+	font-family: 'ヒラギノ角ゴシック W7',/* 'Sawarabi Mincho',*/ Avenir,  Helvetica, Arial, sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
@@ -74,6 +53,6 @@ nav a {
 }
 
 nav a.router-link-exact-active {
-	color: #57d123;
+	color: #f25ed2;
 }
 </style>

@@ -1,15 +1,15 @@
-<template>
-	<hello-world />
-</template>
+<!-- <template> -->
+	<!-- <hello-world /> -->
+<!-- </template> -->
 
 <script>
-import HelloWorld from '../components/HelloWorld'
+// import HelloWorld from '../components/HelloWorld'
 
 export default {
 	name: 'HomeView',
 	// SECTION:コンポーネント
 	components: {
-		HelloWorld,
+		// HelloWorld,
 	},
 	// SECTION:変数
 	data() {
