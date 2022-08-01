@@ -1,61 +1,63 @@
 <template>
-	<div v-if="isDoneLoading">
-		<v-bottom-navigation color="primary" min-height="200">
-			<v-container>
-				<!-- SECTION:再生制御 -->
-				<v-row class="ma-2" justify="center">
-					<v-col cols="3"
-						><v-text-field
-							outlined
-							v-model.number="tempFrameCount"
-							@change=";(player.frameCount = tempFrameCount), emitPlayer()"
-							label="指定コマへ"
-							:placeholder="'0〜' + frameNum + 'までの数値'"
-						></v-text-field
-					></v-col>
-					<v-col cols="6">
-						<v-btn x-large icon v-if="player.state != 'play'" @click=";(player.state = 'play'), emitPlayer()">
-							<span>Play</span>
-							<v-icon x-large>mdi-play</v-icon>
-						</v-btn>
-						<v-btn x-large icon v-if="player.state != 'play'" @click=";(player.frameCount -= player.frameCount > 0 ? 1 : 0), emitPlayer()">
-							<span>前コマ</span>
-							<v-icon>mdi-step-backward</v-icon>
-						</v-btn>
-						<v-btn x-large icon v-else-if="player.state == 'play'" @click=";(player.state = 'pause'), emitPlayer()">
-							<span>Pause</span>
-							<v-icon x-large>mdi-pause</v-icon>
-						</v-btn>
-						<v-btn x-large icon @click=";(player.state = 'stop'), (player.frameCount = 0), emitPlayer()">
-							<span>Stop</span>
-							<v-icon x-large>mdi-stop</v-icon>
-						</v-btn>
-						<v-btn
-							x-large
-							icon
-							v-if="player.state != 'play'"
-							@click=";(player.frameCount += player.frameCount < frameNum - 1 ? 1 : 0), emitPlayer()"
-						>
-							<span>次コマ</span>
-							<v-icon x-large>mdi-step-forward</v-icon>
-						</v-btn>
-					</v-col>
-					<v-col cols="3"><v-select v-model="speed" :items="speedList" label="再生速度" @change="updateSpeed(speed)"></v-select></v-col>
-				</v-row>
-				<v-row class="ma-2" justify="center">
-					<v-slider
-						label="現在コマ"
-						v-model="player.frameCount"
-						:min="slider.min"
-						:max="slider.max"
-						:thumb-size="35"
-						@change="emitPlayer()"
-						thumb-label="always"
-					></v-slider>
-				</v-row>
-			</v-container>
-		</v-bottom-navigation>
-	</div>
+	<v-app v-if="isDoneLoading">
+		<div>
+			<v-bottom-navigation color="primary" min-height="200">
+				<v-container>
+					<!-- SECTION:再生制御 -->
+					<v-row class="ma-2" justify="center">
+						<v-col cols="3"
+							><v-text-field
+								outlined
+								v-model.number="tempFrameCount"
+								@change=";(player.frameCount = tempFrameCount), emitPlayer()"
+								label="指定コマへ"
+								:placeholder="'0〜' + frameNum + 'までの数値'"
+							></v-text-field
+						></v-col>
+						<v-col cols="6">
+							<v-btn x-large icon v-if="player.state != 'play'" @click=";(player.state = 'play'), emitPlayer()">
+								<span>Play</span>
+								<v-icon x-large>mdi-play</v-icon>
+							</v-btn>
+							<v-btn x-large icon v-if="player.state != 'play'" @click=";(player.frameCount -= player.frameCount > 0 ? 1 : 0), emitPlayer()">
+								<span>前コマ</span>
+								<v-icon>mdi-step-backward</v-icon>
+							</v-btn>
+							<v-btn x-large icon v-else-if="player.state == 'play'" @click=";(player.state = 'pause'), emitPlayer()">
+								<span>Pause</span>
+								<v-icon x-large>mdi-pause</v-icon>
+							</v-btn>
+							<v-btn x-large icon @click=";(player.state = 'stop'), (player.frameCount = 0), emitPlayer()">
+								<span>Stop</span>
+								<v-icon x-large>mdi-stop</v-icon>
+							</v-btn>
+							<v-btn
+								x-large
+								icon
+								v-if="player.state != 'play'"
+								@click=";(player.frameCount += player.frameCount < frameNum - 1 ? 1 : 0), emitPlayer()"
+							>
+								<span>次コマ</span>
+								<v-icon x-large>mdi-step-forward</v-icon>
+							</v-btn>
+						</v-col>
+						<v-col cols="3"><v-select v-model="speed" :items="speedList" label="再生速度" @change="updateSpeed(speed)"></v-select></v-col>
+					</v-row>
+					<v-row class="ma-2" justify="center">
+						<v-slider
+							label="現在コマ"
+							v-model="player.frameCount"
+							:min="slider.min"
+							:max="slider.max"
+							:thumb-size="35"
+							@change="emitPlayer()"
+							thumb-label="always"
+						></v-slider>
+					</v-row>
+				</v-container>
+			</v-bottom-navigation>
+		</div>
+	</v-app>
 </template>
 
 <script>
@@ -69,8 +71,8 @@ export default {
 			player: {
 				state: 'stop', //play, pause, stop
 				frameDiff: 2,
-				frameUpdateFreq: 1,
-				frameCount: 0,
+				// frameUpdateFreq: 1,
+				frameCount:  0,
 			},
 			tempFrameCount: null,
 			speedList: [0.1, 0.2, 0.5, 1.0, 1.5, 2.0],
@@ -97,6 +99,7 @@ export default {
 	},
 	props: {
 		frameNum: Number,
+		frameCount: Number,
 		isDoneLoading: Boolean,
 	},
 	// SECTION:関数
@@ -107,8 +110,8 @@ export default {
 			this.$emit('emitPlayer', this.player)
 		},
 		// updateSpeed(_speed) {
-			// this.player.frameDiff =
-			// this.player.frameUpdateFreq =
+		// this.player.frameDiff =
+		// this.player.frameUpdateFreq =
 		// },
 		onKeyDown(e) {
 			console.log('押されたキー: ', e.keyCode)
@@ -116,6 +119,7 @@ export default {
 			switch (e.keyCode) {
 				case 32: //スペースキー
 					this.player.state = this.player.state == 'play' ? 'pause' : 'play'
+					console.log('this.player.frameCount: ', this.player.frameCount)
 					break
 				case 39: //右矢印...次コマへ
 					this.player.frameCount += this.player.frameCount < this.frameNum - 1 ? 1 : 0
@@ -144,6 +148,9 @@ export default {
 			console.log('this.slider.max: ', this.slider.max)
 		},
 	},
+	beforeCreate() {
+		document.title = 'karakuri'
+	},	
 	// キーボード入力イベントの定義
 	mounted() {
 		document.addEventListener('keydown', this.onKeyDown)

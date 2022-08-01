@@ -1,3 +1,22 @@
+/*TODO:markerdDataの時点で、ORIGINを足す。
+{
+	0: {
+		id: "ORIGIN",
+		name: "原点",
+		plots: [
+			{
+				x: 0,
+				y: 0,
+				z: 0
+			},
+			{},{},...（フレーム数だけある）
+
+		]
+	}
+}
+コイツをpushする。
+*/
+
 /**
  * 元csvをロードして、markerごとに整理した配列を生成する
  * @param {*} _file
@@ -41,6 +60,7 @@ export async function genMarkeredData(_file) {
 
 			let finalData = []
 			const markerNum = (cols.length - 2) / 3 //「-2」は、「frame列」と「time列」をのぞいてる
+
 			console.log('markerNum: ', markerNum)
 
 			for (let i = 0; i < markerNum; i++) {
@@ -88,6 +108,18 @@ export async function genMarkeredData(_file) {
 					]
 				*/
 			}
+			// finalDataに{id: "ORIGIN",name: "原点", plots: [{x: 0,y: 0,z: 0},{},{},...（フレーム数だけある）]}をつけたす
+			let frameNum = finalData[0].plots.length
+			let originData = {
+				id: 'ORIGIN',
+				name: '原点',
+				plots: [],
+			}
+			for (let i = 0; i < frameNum; i++) {
+				originData.plots.push({ x: 0, y: 0, z: 0 })
+			}
+			finalData.push(originData)
+
 			// finalDataに{name:'重心', id: 'COM', plots:[{},{},{}...]}をつけたす
 			const comData = await calcCOM(finalData)
 			finalData.push(comData)
@@ -154,14 +186,14 @@ export async function genFramedData(_markeredData) {
 
 		_markeredData.forEach((marker) => {
 			const id = marker.id
-			const name = marker.name			
+			const name = marker.name
 			// NOTE:ここ、キーがidで、バリューの中にnameを含める
 			marker.plots.forEach((plot, j) => {
 				resultArray[j][id] = {
 					x: plot.x,
 					y: plot.y,
 					z: plot.z,
-					name: name
+					name: name,
 				}
 			})
 		})
