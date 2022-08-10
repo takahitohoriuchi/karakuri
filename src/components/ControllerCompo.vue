@@ -1,112 +1,112 @@
 <template>
-	<v-app v-if="isDoneLoading">
-		<span>
-			<v-container>
-				<v-row>
-					<v-col cols="4">
-						<v-btn @click="toggleLeftMenu">karakuriメニュー（'ctrl'キーで出し入れ）</v-btn>
-					</v-col>
-					<v-col cols="4"></v-col>
-					<v-col cols="4">
-						<v-btn @click="toggleRightMenu">操作方法メニュー（']}'キーで出し入れ）</v-btn>
-					</v-col>
-				</v-row>
-			</v-container>
-			<!-- SECTION:左メニュー -->
-			<v-navigation-drawer v-model="isLeftMenu" absolute temporary>
-				<v-list>
-					<v-list-item class="px-2">
-						<v-list-item-avatar>
-							<v-img src="https://gyazo.com/47bbb080bc375399ae32c48c2f7cc674/max_size/1000"></v-img>
-						</v-list-item-avatar>
-					</v-list-item>
+	<span v-if="isDoneLoading">
+		<!-- SECTION:左メニュー -->
+		<v-navigation-drawer v-model="isLeftMenu" :width=500 temporary absolute>
+			<v-list>
+				<v-list-item class="px-2">
+					<v-list-item-avatar size="80">
+						<v-img :src=photoURL></v-img>
+					</v-list-item-avatar>
+					<v-list-item-title class="text-h6"><h2>カラクリUI</h2></v-list-item-title>
+				</v-list-item>
 
-					<v-list-item link>
-						<v-list-item-content>
-							<v-list-item-title class="text-h6"><h2>カラクリUI</h2></v-list-item-title>
-							<v-list-item-subtitle>あれこれ設定</v-list-item-subtitle>
-						</v-list-item-content>
-					</v-list-item>
-				</v-list>
-
-				<v-divider></v-divider>
-				<v-expansion-panels accordion multiple :value="[0, 1, 2, 3, 4, 5]">
-					<!-- キャメラeffects -->
-					<v-expansion-panel>
-						<v-expansion-panel-header>{{ panelMenu[0].name }}</v-expansion-panel-header>
-						<v-expansion-panel-content>
-							<v-chip-group v-model="camLookAtMarkers" column>
-								<v-chip v-for="info in dataInfo" :key="info.name" filter outlined @click="emitCamerer(info.id)">{{ info.name }}</v-chip>
-							</v-chip-group>
-							<!-- <v-switch v-model="isShowCoordinate" inset label="座標系の表示"></v-switch> -->
-						</v-expansion-panel-content>
-					</v-expansion-panel>
-					<!-- エフェクト -->
-					<v-expansion-panel>
-						<v-expansion-panel-header>{{ panelMenu[1].name }}</v-expansion-panel-header>
-						<v-expansion-panel-content>
-							<v-chip-group column>
-								<v-chip v-for="karakuri in karakuris" :key="karakuri.name" @click="emitKarakurier(karakuri.func)" filter outlined>{{
-									karakuri.name
-								}}</v-chip>
-							</v-chip-group>
-						</v-expansion-panel-content>
-					</v-expansion-panel>
-					<!-- マーカー表示 -->
-					<v-expansion-panel>
-						<v-expansion-panel-header>{{ panelMenu[2].name }}</v-expansion-panel-header>
-						<v-expansion-panel-content>
-							<v-container
-								><v-row>
-									<v-col><v-btn @click="deleteAllActiveMarkers">すべて非表示</v-btn></v-col>
-									<v-col><v-btn @click="setAllActiveMarkers">すべて表示</v-btn></v-col>
-								</v-row></v-container
-							>
-							<v-switch v-model="isShowMarkerLabels" inset label="ラベルの表示"></v-switch>
-							<v-chip-group v-model="activeMarkers" column multiple>
-								<v-chip v-for="info in dataInfo" :key="info.name" filter outlined>{{ info.name }}</v-chip>
-							</v-chip-group>
-						</v-expansion-panel-content>
-					</v-expansion-panel>
-					<!-- その他表示設定 -->
-					<v-expansion-panel>
-						<v-expansion-panel-header>{{ panelMenu[3].name }}</v-expansion-panel-header>
-						<v-expansion-panel-content>
-							<v-switch v-model="isShowCoordinate" inset label="座標系の表示"></v-switch>
-						</v-expansion-panel-content>
-					</v-expansion-panel>
-				</v-expansion-panels>
-			</v-navigation-drawer>
-			<!-- SECTION: 右メニュー -->
-			<v-navigation-drawer right v-model="isRightMenu" absolute temporary>
-				<v-list>
-					<!-- <v-list-item class="px-2">
+				<v-list-item>
+					<v-list-item-content>						
+						<v-list-item-subtitle>あれこれ設定</v-list-item-subtitle>
+					</v-list-item-content>
+				</v-list-item>
+			</v-list>
+			<v-divider></v-divider>
+			<v-expansion-panels accordion multiple :value="[0, 1, 2, 3, 4, 5]">
+				<!-- キャメラeffects -->
+				<v-expansion-panel>
+					<v-expansion-panel-header>{{ panelMenu[0].name }}</v-expansion-panel-header>
+					<v-expansion-panel-content>
+						<v-chip-group v-model="camLookAtMarkers" column>
+							<v-chip v-for="info in dataInfo" :key="info.name" filter outlined @click="emitCamerer(info.id)">{{ info.name }}</v-chip>
+						</v-chip-group>
+						<!-- <v-switch v-model="isShowCoordinate" inset label="座標系の表示"></v-switch> -->
+					</v-expansion-panel-content>
+				</v-expansion-panel>
+				<!-- ベーシックカラクリ -->
+				<v-expansion-panel>
+					<v-expansion-panel-header>{{ panelMenu[1].name }}</v-expansion-panel-header>
+					<v-expansion-panel-content>
+						<v-chip-group column v-model="selectedKarakuriIndex">
+							<v-chip v-for="karakuri in karakuris" :key="karakuri.name" @click="emitKarakurier(karakuri.func)" filter outlined>{{
+								karakuri.name
+							}}</v-chip>
+						</v-chip-group>
+						<!-- <v-container v-if="karakuris[selectedKarakuriIndex].name == '軌跡'">
+							<v-row>
+								<v-slider
+							label="軌跡の長さ"
+							v-model="trail"
+							:min=20
+							:max=10
+							:thumb-size="20"
+							@change="emitKarakurier(karakuri.func, {trailLength: trail})"
+							thumb-label="always"
+						></v-slider>
+							</v-row>
+						</v-container> -->
+					</v-expansion-panel-content>
+				</v-expansion-panel>
+				<!-- マーカー表示 -->
+				<v-expansion-panel>
+					<v-expansion-panel-header>{{ panelMenu[2].name }}</v-expansion-panel-header>
+					<v-expansion-panel-content>
+						<v-container
+							><v-row>
+								<v-col><v-btn @click="deleteAllActiveMarkers">すべて非表示</v-btn></v-col>
+								<v-col><v-btn @click="setAllActiveMarkers">すべて表示</v-btn></v-col>
+							</v-row></v-container
+						>
+						<v-switch v-model="isShowMarkerLabels" inset label="ラベルの表示"></v-switch>
+						<v-chip-group v-model="activeMarkers" column multiple>
+							<v-chip v-for="info in dataInfo" :key="info.name" filter outlined>{{ info.name }}</v-chip>
+						</v-chip-group>
+					</v-expansion-panel-content>
+				</v-expansion-panel>
+				<!-- その他表示設定 -->
+				<v-expansion-panel>
+					<v-expansion-panel-header>{{ panelMenu[3].name }}</v-expansion-panel-header>
+					<v-expansion-panel-content>
+						<v-switch v-model="isShowCoordinate" inset label="座標系の表示"></v-switch>
+						<v-switch v-model="isShowSphere" inset label="世界球の表示"></v-switch>
+					</v-expansion-panel-content>
+				</v-expansion-panel>
+			</v-expansion-panels>
+		</v-navigation-drawer>
+		<!-- SECTION: 右メニュー -->
+		<v-navigation-drawer right v-model="isRightMenu" :width=400 temporary absolute>
+			<v-list>
+				<!-- <v-list-item class="px-2">
 					<v-list-item-avatar>
 						<v-img src="https://gyazo.com/47bbb080bc375399ae32c48c2f7cc674/max_size/1000"></v-img>
 					</v-list-item-avatar>
 				</v-list-item> -->
-					<v-list-item>
-						<v-list-item-content>
-							<v-list-item-title class="text-h6"><h3>キー操作</h3></v-list-item-title>
-							<v-list-item-subtitle>はこうやれ</v-list-item-subtitle>
-						</v-list-item-content>
-					</v-list-item>
-					<v-divider></v-divider>
+				<v-list-item>
+					<v-list-item-content>
+						<v-list-item-title class="text-h6"><h3>キー操作</h3></v-list-item-title>
+						<v-list-item-subtitle>はこうやれ</v-list-item-subtitle>
+					</v-list-item-content>
+				</v-list-item>
+				<v-divider></v-divider>
 
-					<v-list-item three-line v-for="(item, i) in how2ControllWithKey" :key="i">
-						<v-list-item-icon
-							><v-icon>{{ item.icon }}</v-icon></v-list-item-icon
-						>
-						<v-list-item-content>
-							<v-list-item-title class="text-h6"> {{ item.controllname }}</v-list-item-title>
-							<v-list-item-subtitle>{{ item.discription }}</v-list-item-subtitle>
-							<v-list-item-subtitle>{{ item.keyname }}</v-list-item-subtitle>
-						</v-list-item-content>
-					</v-list-item>
-				</v-list>
-			</v-navigation-drawer>
-		</span>
-	</v-app>	
+				<v-list-item three-line v-for="(item, i) in how2ControllWithKey" :key="i">
+					<v-list-item-icon
+						><v-icon>{{ item.icon }}</v-icon></v-list-item-icon
+					>
+					<v-list-item-content>
+						<v-list-item-title class="text-h6"> {{ item.controllname }}</v-list-item-title>
+						<v-list-item-subtitle>{{ item.discription }}</v-list-item-subtitle>
+						<v-list-item-subtitle>{{ item.keyname }}</v-list-item-subtitle>
+					</v-list-item-content>
+				</v-list-item>
+			</v-list>
+		</v-navigation-drawer>
+	</span>
 </template>
 
 <script>
@@ -128,6 +128,7 @@ export default {
 			displayer: {},
 			isShowMarkerLabels: true,
 			isShowCoordinate: true,
+			isShowSphere: false,
 			karakuris: [
 				{
 					name: 'なし',
@@ -138,10 +139,16 @@ export default {
 					func: 'drawHuman',
 				},
 				{
+					name: '軌跡',
+					func: 'drawTrails'
+				},
+				{
 					name: '鏡像',
 					func: 'drawMirror',
 				},
 			],
+			selectedKarakuriIndex: 0,
+			trail: 10,
 			dataInfo: null,
 			activeMarkers: [],
 			camLookAtMarkers: [],
@@ -206,11 +213,14 @@ export default {
 	},
 	props: {
 		// dataInfo: Array,
+		frameNum: Number,
 		isDoneLoading: Boolean,
+		photoURL: String	
 	},
 	// SECTION:関数
 	methods: {
 		emitKarakurier(_karakuriFunc) {
+			// this.$emit('emitKarakurier', _karakuriFunc, _options)			
 			this.$emit('emitKarakurier', _karakuriFunc)
 		},
 		emitCamerer(_markerId) {
@@ -237,6 +247,7 @@ export default {
 			console.log('this.activeMarkers: ', this.activeMarkers)
 		},
 		toggleLeftMenu() {
+			console.log('open L menu')
 			this.isLeftMenu = !this.isLeftMenu
 			if (this.isLeftMenu) {
 				this.sounds.open.play()
@@ -245,6 +256,7 @@ export default {
 			}
 		},
 		toggleRightMenu() {
+			console.log('open R menu')
 			this.isRightMenu = !this.isRightMenu
 			if (this.isRightMenu) {
 				this.sounds.open.play()
@@ -252,8 +264,7 @@ export default {
 				this.sounds.close.play()
 			}
 		},
-		onKeyDown(e) {
-			console.log('押されたキー: ', e.keyCode)
+		onKeyDown(e) {			
 			switch (e.keyCode) {
 				case 17: // ctrlキー
 					e.preventDefault()

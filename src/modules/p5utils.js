@@ -1,16 +1,4 @@
-// vue変数やグローバル変数を、読み取ってるだけの関数と書き換えている関数の両方ある
-// 【読み取りだけの関数】
-// ・おもにdraw系の関数
-// ・vueインスタンスまるごと引数にしなくてオッケー
-
-// 【書き換えもしてる関数】
-// ・update系の関数
-// ・これら関数は、「return」を返すように書き換える。すると、メイン関数内で、「グローバル変数 = この関数()」の形でかける。
-
-// class P5util{
-//     constructor()
-// }
-
+// SECTION:描画系
 /**
  * 座標系を描画
  * @param {Object} _p p5インスタンス
@@ -44,6 +32,19 @@ export function drawCoordinate(_p, _axLen = 100, _dotSize = 5) {
 }
 
 /**
+ * 世界球の表示
+ * @param {*} _p 
+ * @param {*} _r 
+ * NOTE:for 一人称視点
+ */
+export function drawSphere(_p, _r){
+	_p.noFill()
+	_p.strokeWeight(0.11)
+	_p.stroke(255, 255, 255)
+	_p.sphere(_r)
+}
+
+/**
  * マーカー点を描画
  * @param {Object} _p p5インスタンス
  * @param {Object} _tempDrawPlots 現在フレームのプロット情報
@@ -74,13 +75,15 @@ export function drawMarkers(_p, _tempDrawPlots, _activeMarkers) {
 	})
 }
 
+
+
 /**
  * マーカーのラベル（部位名）を描画
  * @param {Object} _p p5インスタンス
  * @param {Object} _tempDrawPlots 現在フレームのプロット情報
  * @param {Array} _activeMarkers 表示ONのマーカーの配列
  */
-export function drawMarkerLabels(_p, _tempDrawPlots, _activeMarkers) {
+export function drawMarkerLabels(_p, _tempDrawPlots, _activeMarkers, _theta, _phi) {
 	// （１）部位の描画
 	_p.stroke(255)
 	_p.strokeWeight(4)
@@ -92,11 +95,12 @@ export function drawMarkerLabels(_p, _tempDrawPlots, _activeMarkers) {
 			// マーカーの位置
 			const x = value.x
 			const y = value.y
-			const z = value.z
+			const z = value.z			
 			// マーカー名の描画
 			_p.push()
 			_p.translate(x, y, z)
-			// _p.rotateY(camParameters.theta)
+			_p.rotateY(_theta)
+			_p.rotateX(-_phi)			
 			_p.rotateZ(Math.PI)
 			_p.fill('#eeeeee')
 			_p.text(`${value.name}`, 0, 0)
@@ -105,8 +109,10 @@ export function drawMarkerLabels(_p, _tempDrawPlots, _activeMarkers) {
 	})
 }
 
+
+// SECTION:update系
 /**
- * frameCountをアップデート
+ * frameCountを更新
  * @param {String} _state
  * @param {Number} _frameCount
  * @param {Number} _frameNum
@@ -114,40 +120,61 @@ export function drawMarkerLabels(_p, _tempDrawPlots, _activeMarkers) {
  * @returns {Number} frameCount
  */
 export function updateFrameCount(_frameCount, _frameNum, _frameDiff) {
-	let newFrameCount = _frameCount
 	// frameCountの更新
-
-	console.log('_frameCount: ', _frameCount)
-	console.log('_frameNum: ', _frameNum)
-	if (_frameCount < _frameNum) {
-		newFrameCount = _frameCount + _frameDiff
-		// FPSを小さくすると、frameCount+=のハバが広がるので、frameNumを超えないよう調整↓
-		newFrameCount = newFrameCount >= _frameNum ? _frameNum - 1 : newFrameCount
-		// thi.$refs.player.player.frameCount = _frameCount
-		// console.log('thi.$refs.player.framecount: ', thi.$refs.player.player.frameCount)
-	} else {
-		newFrameCount = _frameNum
-		// this.$refs.player.player.frameCount = this.frameCount
+	let newFrameCount = _frameCount + _frameDiff
+	// frameNumを超えたらframeNumがmax
+	if (newFrameCount >= _frameNum-1) {
+		newFrameCount = _frameNum-1
 	}
 	return newFrameCount
 }
 
-export function updatePreDrawPlots(_preDrawPlots, _tempDrawPlots) {
-	// let _newPreDrawPlots = _preDrawPlots
-	let newPreDrawPlots = {}
-	// 一コマ前のものをpreDrawPlotsにコピー
+// export function updateDrawPlots(_drawPlots){
 
-	Object.entries(_tempDrawPlots).forEach(([key, value]) => {
-		// tempDrawPlotsのこの部位座標がNaNだったら、preDrawPlotsは据えおく！
-		newPreDrawPlots[key] = !Number.isNaN(value.x) ? value : _preDrawPlots[key]
-	})
+// }
 
-	return newPreDrawPlots
+
+/**
+ * カメラを更新
+ * @param {Object} param0 camParamsを返す
+ * @returns 
+ */
+export function updateCam({ _camParams, _dR = 0, _dPhi = 0, _dTheta = 0, _lookAt = _camParams.lookAt }) {
+	let camParams = _camParams
+	// カメラ距離を更新
+	camParams.r = camParams.r + _dR
+	// 距離の境界条件
+	if (_dR < 0 && camParams.r <= 0) camParams.r = 1
+	// カメラ仰角を更新
+	camParams.phi = camParams.phi + _dPhi
+	// 仰角の境界条件
+	if (_dPhi >= 0 && camParams.phi > Math.PI * 0.5) camParams.phi = Math.PI * 0.499999
+	if (_dPhi <= 0 && camParams.phi < -Math.PI * 0.5) camParams.phi = -Math.PI * 0.499999
+	// カメラ横角度を更新
+	camParams.theta = camParams.theta + _dTheta
+
+	camParams.lookAt = _lookAt
+
+	camParams.x = camParams.lookAt[0] + camParams.r * Math.cos(camParams.phi) * Math.sin(camParams.theta)
+	camParams.y = camParams.lookAt[1] + camParams.r * Math.sin(camParams.phi)
+	camParams.z = camParams.lookAt[2] + camParams.r * Math.cos(camParams.phi) * Math.cos(camParams.theta)
+	// console.log('camParams: ', camParams)
+	return camParams
 }
 
-export function updateTempDrawPlots(_thisFramePlots) {
-	// TODO:一時停止状態のときは更新しない（stateで条件分岐）
-	// NOTE:二倍にのばしたりするのは、karakuriFuncsそれぞれでやる！
-	// if (thi.state == 'play') {
-	return _thisFramePlots
+
+// SECTION:その他
+
+/**
+ * キャンバスサイズを拡大/縮小
+ * @param {*} _p 
+ * @param {*} _isFullScreen 
+ */
+export function windowResized(_p, _isFullScreen) {
+	_isFullScreen = !_isFullScreen
+	if (_isFullScreen) {
+		_p.resizeCanvas(_p.windowWidth, _p.windowHeight)
+	} else {
+		_p.resizeCanvas(1600, 900)
+	}
 }

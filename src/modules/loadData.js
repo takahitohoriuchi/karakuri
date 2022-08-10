@@ -1,20 +1,47 @@
-/*TODO:markerdDataの時点で、ORIGINを足す。
-{
-	0: {
+/*NOTE:
+ロードして、映像につかうデータは２種類
+(1)markeredData
+(2)framedData
+
+（１）markeredDataの内容
+[
+	{
 		id: "ORIGIN",
 		name: "原点",
 		plots: [
-			{
-				x: 0,
-				y: 0,
-				z: 0
-			},
-			{},{},...（フレーム数だけある）
-
+			{x: 0, y: 0, z: 0},
+			{x: 0, y: 0, z: 0},
+			{},{},...（※コマ数ぶん）
 		]
-	}
-}
-コイツをpushする。
+	},
+	{
+		id: "FHD",
+		name: "おでこ",
+		plots: [
+			{x: ●, y: ●, z: ●},
+			{x: ●, y: ●, z: ●},
+			{},{},...（※コマ数ぶん）
+		]
+	},
+	{}, {}, ...（マーカー数ぶんだけ並ぶ）
+]
+
+
+(2)framedDataの内容
+[
+	{
+		部位ID1: {x:●, y:●, z:●},
+		部位ID2:{x:●, y:●, z:●},
+		...
+	},
+	{
+		部位ID1: {x:●, y:●, z:●},
+		部位ID2:{x:●, y:●, z:●},
+		...
+	},
+	{},{},...（※コマ数ぶんObjが並ぶ）
+]
+
 */
 
 /**
@@ -25,7 +52,8 @@
  *
  */
 export async function genMarkeredData(_file) {
-	let file = _file.target.files[0]
+	// let file = _file.target.files[0]
+	let file = _file
 
 	if (!file.type.match('text/csv')) {
 		console.log('csvにしてください')
@@ -124,11 +152,42 @@ export async function genMarkeredData(_file) {
 			const comData = await calcCOM(finalData)
 			finalData.push(comData)
 
-			console.log('finalData: ', finalData)
+			// console.log('finalData: ', finalData)
 			resolve(finalData)
 		}
 		reader.onerror = (e) => reject(e)
 	})
+}
+
+export async function loadMarkeredData(_selectedFileData) {
+	/*
+	_selectedFileData = {
+		部位ID: {
+
+		},
+		部位ID:{
+
+		},
+		...（マーカー数ぶんある）
+	}
+	 */
+	// Object.entries(_selectedFileData).forEach(([k, v], i) => {})
+	try {
+		const data = await Object.values(_selectedFileData).map(async (v) => {
+			return v
+		})
+		console.log('data: ', data)
+		// return data
+		return Promise.all(data).then((d) => {
+			return d
+		})
+		
+	} catch (error) {
+		console.log(error)		
+	}
+	
+	
+	
 }
 
 /**
@@ -197,7 +256,7 @@ export async function genFramedData(_markeredData) {
 				}
 			})
 		})
-		console.log('resultArray(genFramedData): ', resultArray)
+		// console.log('resultArray(genFramedData): ', resultArray)
 		resolve(resultArray)
 	})
 }

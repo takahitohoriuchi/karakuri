@@ -9,11 +9,13 @@ const routes = [
 		path: '/',
 		name: 'home',
 		component: HomeView,
+		props: true,
 	},
 	{
-		path: '/loader',
-		name: 'loader',
-		component: () => import('../views/LoaderView.vue'),
+		path: '/mypage',
+		name: 'mypage',
+		component: () => import('../views/MyPage.vue'),
+		props: true,
 	},
 	{
 		path: '/play',
