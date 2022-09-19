@@ -14,7 +14,7 @@
 								:placeholder="'0〜' + frameNum + 'までの数値'"
 							></v-text-field
 						></v-col>
-						
+
 						<v-col cols="1">
 							<v-btn x-large icon v-if="player.state != 'play'" @click=";(player.frameCount -= player.frameCount > 0 ? 1 : 0), emitPlayer()">
 								<v-icon>mdi-step-backward</v-icon>
@@ -27,7 +27,7 @@
 							<v-btn x-large icon v-if="player.state == 'play'" @click=";(player.state = 'pause'), emitPlayer()">
 								<v-icon x-large>mdi-pause</v-icon>
 							</v-btn>
-						</v-col>						
+						</v-col>
 						<v-col cols="1">
 							<v-btn x-large icon @click=";(player.state = 'stop'), (player.frameCount = 0), emitPlayer()">
 								<v-icon x-large>mdi-stop</v-icon>
@@ -41,7 +41,7 @@
 								@click=";(player.frameCount += player.frameCount < frameNum - 1 ? 1 : 0), emitPlayer()"
 							>
 								<v-icon x-large>mdi-step-forward</v-icon>
-							</v-btn>													
+							</v-btn>
 						</v-col>
 						<v-col cols="2"><v-select v-model="speed" :items="speedList" label="再生速度" @change="updateSpeed(speed)"></v-select></v-col>
 					</v-row>
@@ -119,14 +119,14 @@ export default {
 			// console.log('押されたキー: ', e.keyCode)
 			e.preventDefault()
 			switch (e.keyCode) {
-				case 32: //スペースキー					
-					if(this.player.state == 'play'){
+				case 32: //スペースキー
+					if (this.player.state == 'play') {
 						this.player.state = 'pause'
-					}else if(this.player.state == 'pause'){
+					} else if (this.player.state == 'pause') {
 						this.player.state = 'play'
-					}else if(this.player.state == 'stop'){
+					} else if (this.player.state == 'stop') {
 						this.player.frameCount = 0
-						this.player.state = 'play'						
+						this.player.state = 'play'
 					}
 					console.log('this.player.frameCount: ', this.player.frameCount)
 					break
@@ -144,6 +144,11 @@ export default {
 				case 40: //下矢印...再生速度DOWN
 					this.speed = this.speed > 0.1 ? parseFloat((this.speed - 0.1).toFixed(2)) : this.speed
 					console.log('this.speed: ', this.speed)
+					break
+				case 18: //option(alt)キー・・・NOTE:カラクリ編集のためにpauseにする
+					if (this.player.state == 'play') {
+						this.player.state = 'pause'
+					}
 					break
 				default:
 					break

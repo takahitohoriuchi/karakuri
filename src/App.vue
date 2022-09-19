@@ -3,16 +3,16 @@
 		<!-- NOTE:この部分は、全ページ共通。∴ページ遷移時も「更新」されないのだ。 -->
 		<v-app-bar app color="base" dark>
 			<div class="d-flex align-center">
-				<v-app-bar-title>みゅーごく</v-app-bar-title>
+				<v-app-bar-title>KARAKURI</v-app-bar-title>
 				<!-- ここにv-imgでロゴ -->
 			</div>
 			<v-spacer></v-spacer>
 			<!-- SECTION:ナビゲーション -->
-			<v-btn text @click="$router.push({ name: 'home', params: {memberDocData0: memberDocData} })">HOME</v-btn>
+			<v-btn text @click="$router.push({ name: 'home', params: { memberDocData0: memberDocData } })">HOME</v-btn>
 			|
-			<v-btn text @click="$router.push({ name: 'mypage', params:{memberDocData0: memberDocData} })">マイページ</v-btn>
+			<v-btn text @click="$router.push({ name: 'mypage', params: { memberDocData0: memberDocData } })">マイページ</v-btn>
 			|
-			<v-btn text @click="$router.push({ name: 'play', params: {memberDocData0: memberDocData}  })">再生ビュー</v-btn>
+			<v-btn text @click="$router.push({ name: 'play', params: { memberDocData0: memberDocData } })">再生ビュー</v-btn>
 		</v-app-bar>
 
 		<v-main>
@@ -25,15 +25,16 @@
 <script>
 // DEBUG:このutilsは名前を変えて、firestore.jsに直接こうした関数を書き込む OR utilsじゃない名前にする
 // import { getMemberDocDataWithLINEuID } from './modules/utils.js'
-import { /* onAuthStateChanged */ } from 'firebase/auth'
-import {/* auth */} from '@/modules/authentication.js'
-import { /* getMemberDocDataWithMemberID */ } from './modules/firestoreUtils'
+import /* onAuthStateChanged */ 'firebase/auth'
+import /* auth */ '@/modules/authentication.js'
+import /* getMemberDocDataWithMemberID */ './modules/firestoreUtils'
 export default {
 	name: 'App',
 	data: () => ({
-		memberDocData: {},		
+		memberDocData: {},
 	}),
-	created: async function () {				
+	created: async function () {
+		document.title = 'カラクリ'
 	},
 }
 </script>

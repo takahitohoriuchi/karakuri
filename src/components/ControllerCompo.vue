@@ -266,14 +266,18 @@ export default {
 		},
 		onKeyDown(e) {			
 			switch (e.keyCode) {
-				case 17: // ctrlキー
+				case 9: // tabキー・・・左メニュー
 					e.preventDefault()
 					this.toggleLeftMenu()
 					break
-				case 221: // ]}キー
+				case 221: // ]}キー・・・右メニュー
 					e.preventDefault()
 					this.toggleRightMenu()
 					break
+				// case 18: //option(alt)キー・・・カラクリ
+				// 	e.preventDefault()
+				// 	console.log('optionキーを押した')
+				// 	break
 				default:
 					break
 			}

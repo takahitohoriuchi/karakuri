@@ -8,10 +8,10 @@
 						<v-card-subtitle>アカウント未作成ならサインアップする</v-card-subtitle>						
 						<v-card-actions>
 							<v-container>
-								<v-row><v-text-field v-model='userEmail' label="メールアドレス" outlined></v-text-field></v-row>
-								<v-row><v-text-field  v-model='userPassword' label="パスワード" outlined></v-text-field></v-row>								
-                                <v-row><v-col><v-btn @click="tryLogIn">ログイン</v-btn></v-col></v-row>
-                                <v-row><v-col><v-btn @click="trySignUp">サインアップ</v-btn></v-col></v-row>
+								<v-row class="mx-auto"><v-text-field v-model='userEmail' label="メールアドレス" outlined></v-text-field></v-row>
+								<v-row class="mx-auto"><v-text-field  v-model='userPassword' type="password" label="パスワード" outlined></v-text-field></v-row>								
+                                <v-row class="mx-auto"><v-col><v-btn @click="tryLogIn"><v-icon>mdi-login</v-icon>ログイン</v-btn></v-col></v-row>
+                                <v-row class="mx-auto"><v-col><v-btn @click="trySignUp">サインアップ</v-btn></v-col></v-row>
 							</v-container>
 						</v-card-actions>
 					</v-card>
