@@ -112,6 +112,8 @@
 <script>
 import Open from '@/assets/sounds/open.mp3'
 import Close from '@/assets/sounds/close.mp3'
+import Nijimi from '@/assets/sounds/nijimi.mp3'
+
 export default {
 	name: 'ControllerCompo',
 	// SECTION:コンポーネント
@@ -152,6 +154,7 @@ export default {
 			dataInfo: null,
 			activeMarkers: [],
 			camLookAtMarkers: [],
+			isEdittingLength2: false,
 			// panel:
 			panelMenu: [
 				{
@@ -208,6 +211,7 @@ export default {
 			sounds: {
 				open: new Audio(Open),
 				close: new Audio(Close),
+				nijimi: new Audio(Nijimi)
 			},
 		}
 	},
@@ -215,7 +219,8 @@ export default {
 		// dataInfo: Array,
 		frameNum: Number,
 		isDoneLoading: Boolean,
-		photoURL: String	
+		photoURL: String,
+		isEdittingLength: Boolean,
 	},
 	// SECTION:関数
 	methods: {
@@ -283,6 +288,14 @@ export default {
 			}
 		},
 	},
+	watch: {
+		isEdittingLength(val){
+			console.log('isEdittingLength in Controller: ', this.isEdittingLength)
+			if(val == true){				
+				this.sounds.nijimi.play()
+			}
+		}		
+	},
 	// キーボード入力イベントの定義
 	mounted() {
 		document.addEventListener('keydown', this.onKeyDown)
@@ -291,6 +304,7 @@ export default {
 	beforeDestroy() {
 		document.removeEventListener('keydown', this.onKeyDown)
 	},
+	
 }
 </script>
 

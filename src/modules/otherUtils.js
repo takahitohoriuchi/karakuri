@@ -2,6 +2,7 @@ import { Vector3 } from 'matrixgl'
 import { Matrix4 /* Vector4 */ } from 'matrixgl'
 
 
+
 /**
  * 4x4行列と4次元ベクトルをかける
  * @param {Array} _m
@@ -48,7 +49,7 @@ function mulMatAndVec(_m, _v) {
  * @param {Object} _camParams 
  * @returns {Array} 2次元ベクトル
  */
-function get2dPosFrom3dPos(_vec3d, _camParams){
+export function get2dPosFrom3dPos(_vec3d, _camParams){
 	// （１）モデル行列
 	const modelMat = Matrix4.identity().translate(0, 0, 0) //「原点」をあらわすモデル行列を用意
 	// NOTE:ここで一般には、translate(0,0,0).ratateX(Math.PI).scale(5,5,5)というふうに変換してく
@@ -108,7 +109,7 @@ function get2dPosFrom3dPos(_vec3d, _camParams){
  * @returns 
  */
 export function getNearestMarkerID(_tempDrawPlots, _activeMarkers, _mousePos, _camParams){
-    // console.log('getNearesMarker起動')
+    const radius = 30
 	// すべてのマーカーの画面2D座標を算出して、配列に格納
 	let marker2dVecs = Object.entries(_tempDrawPlots).map(([k, v], i) => {
         // アクティブマーカーのみ
@@ -144,7 +145,7 @@ export function getNearestMarkerID(_tempDrawPlots, _activeMarkers, _mousePos, _c
 	})
 
 	// マウス最近傍マーカーは、指定半径よりも近くにあるか？？
-	if (marker2dVecs[0].dist < 30) {
+	if (marker2dVecs[0].dist < radius) {
         //あれば、そのマーカーIDを返す        
 		return marker2dVecs[0].ID
 	} else {
@@ -152,4 +153,5 @@ export function getNearestMarkerID(_tempDrawPlots, _activeMarkers, _mousePos, _c
 		return null
 	}
 }
+
 

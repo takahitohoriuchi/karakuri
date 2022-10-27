@@ -260,3 +260,9 @@ export async function genFramedData(_markeredData) {
 		resolve(resultArray)
 	})
 }
+
+// TODO:framedDataの更新（ドラッグなどの基本操作にて）
+// export async function updateFramedDate(_framedData){
+	
+
+// }
