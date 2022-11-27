@@ -5,7 +5,7 @@
 		<h2 class="my-10">{{ userName }}さん</h2>
 		<v-container class="my-10">
 			<v-row justify="center">
-				<v-img v-if="photoURL" class="round" max-height="400" max-width="400" :src="photoURL"></v-img>
+				<v-img v-if="photoURL" class="round" max-height="200" max-width="200" :src="photoURL"></v-img>
 			</v-row>
 			<v-row justify="center" @dragover.prevent @dragenter="onDragEnter" @dragleave="onDragLeave" @drop="onDrop">
 				<v-col cols="3"></v-col>
@@ -18,8 +18,7 @@
 						counter
 						label="画像"
 						placeholder="ここに画像をD&D"
-						filled
-						loading
+						filled						
 						:background-color="isDragging ? 'blue' : 'null'"
 					>
 					</v-file-input>

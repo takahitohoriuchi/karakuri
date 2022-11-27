@@ -11,7 +11,7 @@
 							v-model="file"
 							clearable
 							counter
-							label="csvファイルをドラッグ&ドロップ"
+							label="ここからcsvファイルを登録"
 							filled
 							:background-color="isDragging ? 'blue' : 'null'"
 							@change="loadSelectedFile(file)"
@@ -38,9 +38,10 @@
 				:frameNum="frameNum"
 				:photoURL="memberDocData.photoURL"
 				:isEdittingLength = "isEdittingLENGTH"
-				@emitKarakurier="catchKarakurierFromController"
-				@emitCamerer="catchCamererFromController"
+				:edges = "edges"
+				@emitKarakurier="catchKarakurierFromController"				
 			/>
+			<!-- NOTE:emitCamererを一旦削除 -->
 		</v-card>
 	</div>
 </template>
@@ -84,8 +85,18 @@ let camParams = {
 // TODO:骨格モデル（各マーカについて、「親マーカ」と「ボーン伸縮率」を定義するObj）
 // let skeleton = skeletonModel
 let plots = [] //objの配列
+let index = 0
+let preIndex = 0
 let trailLength = 10
 let font
+
+// plotsを現在コマへと更新
+function updatePlots(_frameCount, _framedData) {
+	plots[index] = _framedData[_frameCount]
+	preIndex = index
+	index = (index + 1) % trailLength
+	// TODO:ガチ動的カラクリは、ここでplots[index]に変形をくわえる。
+}
 
 export default {
 	name: 'PlayView',
@@ -97,7 +108,7 @@ export default {
 			memberDocData: null,
 			markeredData: [], //データ:マーカーごとver.（SEE:loadData.js）構造は、[{マーカー1の全コマデータ}, {マーカー2の全コマデータ}, ...（以下マーカーの数だけ続く）]
 			framedData: [], //データ：コマごとver.（SEE:loadData.js）構造は、[{コマ1の全マーカーデータ}, {コマ2の全マーカーデータ}, ...（以下コマの数だけ続く）]
-			edges: [], //NOTE:デフォでは、karakuri.jsのedgesから代入。
+			edges: [], //どのマーカーどうしを結んでるか？デフォでは、karakuri.jsのedgesから代入。
 			dataInfo: null, //↑markeredDataのうち、マーカー名一覧・フレーム数をとって加工
 			isDoneLoading: false,
 			skeleton: skeletonModel,
@@ -123,15 +134,17 @@ export default {
 			this.state = _dataObj.state
 			this.frameCount = _dataObj.frameCount
 			this.frameDiff = _dataObj.frameDiff
+			console.log('this.frameCount: ', this.frameCount)
+			updatePlots(this.frameCount, this.framedData)
 		},
 		catchKarakurierFromController(_selectedKarakuri) {
 			this.selectedKarakuri = _selectedKarakuri
 			//NOTE:watch()起動。edges[]を更新する。
 		},
-		catchCamererFromController(_camerer) {
-			this.camLookAt = _camerer.lookAt
-			console.log('camLookAt: ', this.camLookAt)
-		},
+		// catchCamererFromController(_camerer) {
+		// 	this.camLookAt = _camerer.lookAt
+		// 	console.log('camLookAt: ', this.camLookAt)
+		// },
 		async loadSelectedFile(_file) {
 			console.log('_file: ', _file)
 			this.markeredData = await genMarkeredData(_file)
@@ -249,8 +262,7 @@ export default {
 		const sketch = (p) => {
 			var thi = this //NOTE:vueインスタンスのthisがわり for 以下の自作関数群
 			let fontReady = false
-			let index = 0
-			let preIndex = 0
+			
 			let mousePushDuration = 0 //マウス押してから離すまでの時間
 			let nearestMarkerID = null
 			let isEdittingTSUNAGI = false //つなぐ/はずすのロープの描画モード
@@ -268,13 +280,7 @@ export default {
 				fontReady = true
 			}
 
-			// plotsを現在コマへと更新
-			function updatePlots(_frameCount) {
-				plots[index] = thi.framedData[_frameCount]
-				preIndex = index
-				index = (index + 1) % trailLength
-				// TODO:ガチ動的カラクリは、ここでplots[index]に変形をくわえる。
-			}
+			
 			// マウス最近傍マーカーを取得
 			function getNearestMarkerID0() {
 				// マウスがキャンバス内にあったら
@@ -306,7 +312,7 @@ export default {
 				cam.perspective(camParams.fovy, camParams.aspect, camParams.near, camParams.far)
 				console.log('cam: ', cam)
 				console.log('trailLength: ', trailLength)
-				console.log('いまからupdatePlotsDraw()をsetup()内で実行するよ')
+				console.log('いまからupdatePlots()をsetup()内で実行するよ')
 				//  plotを初期化しておく（trailLength個）
 				for (let i = 0; i < trailLength; i++) {
 					let obj = {}
@@ -350,8 +356,11 @@ export default {
 					nearestMarkerID = OPTIONKEY ? getNearestMarkerID0() : null
 
 
-					// マーカーの描画TODO:これをカラクリに吸収させる？？
+					// マーカーの描画
 					drawPlots(p, plots[preIndex], this.$refs.controller.activeMarkers, nearestMarkerID, camParams)
+					if(this.selectedKarakuri == 'drawTrails'){
+						drawTrails(p, plots, preIndex, trailLength, this.$refs.controller.activeMarkers, camParams)
+					}
 
 					// マーカーラベルの描画
 					if (this.$refs.controller.isShowMarkerLabels) {
@@ -386,15 +395,11 @@ export default {
 							setTempSHINSHUKU(p, plots[preIndex], tempSHINSHUKU, nearestMarkerID, camParams)								
 						}
 					
-					}
-					// optionキーを離すと、ロープ描画モードがオフに
-					else{
-						isEdittingTSUNAGI = false
-					}
+					}		
 					// TSUNAGI編集中の見た目
-					if (isEdittingTSUNAGI) {
-						tsunagiNodeID2 = nearestMarkerID						
-						drawRope(p, plots[preIndex], tsunagiNodeID1, tsunagiNodeID2, camParams)
+					if (isEdittingTSUNAGI) {						
+						console.log('isEdittingTSUNAGI なう')			
+						drawRope(p, plots[preIndex], tsunagiNodeID1, nearestMarkerID, camParams)
 					}
 					// NOBASHICHIJIMI編集中の見た目
 					if(this.isEdittingLENGTH){
@@ -402,11 +407,11 @@ export default {
 						drawSHINSHUKU(p, plots[preIndex], tempSHINSHUKU, camParams)						
 					}
 
-					// コマの更新（frameCount）
+					// コマの更新（frameCount）					
 					if (this.state == 'play') {
 						this.frameCount = updateFrameCount(t, this.frameNum, this.frameDiff)
 						this.$refs.player.player.frameCount = this.frameCount //NOTE:PlayerCompoのframeCountも連動させる
-						updatePlots(this.frameCount)
+						updatePlots(this.frameCount, this.framedData)
 					}
 
 					// 最後コマまでいったら、stateをstopにする
@@ -438,20 +443,26 @@ export default {
 			// :::マウス操作		
 			// マウスを離したとき
 			p.mouseClicked = (e) => {
-				console.log('マウス位置: ', p.mouseX)
+				// console.log('マウス位置: ', p.mouseX)
 				// optionキー ∩ 短クリック ∩ 最近傍マーカーあり
 				if (e.altKey && (mousePushDuration < 40) && nearestMarkerID) {
 					console.log('マウス押してた時間: ', mousePushDuration)
-					console.log('⌥ + 短クリック（【むすぶ/ほどく】モード発火')
-					if(tsunagiNodeID1 && tsunagiNodeID2){
+					console.log('⌥ + 短クリック（【むすぶ/ほどく】モード発火')				
+					// tsunagiNodeID1だけ選択してる状態
+					if(tsunagiNodeID1 && !tsunagiNodeID2){
+						tsunagiNodeID2 = nearestMarkerID
+						console.log('tsunagiNodeID2: ', tsunagiNodeID2)
 						// むすぶ/ほどくを実行
 						updateEdges(this.edges, tsunagiNodeID1, tsunagiNodeID2)
 						isEdittingTSUNAGI = false
 						tsunagiNodeID1 = null, tsunagiNodeID2 = null
-					}else{
+					}					
+					// tsunagiNodeIDをまだどちらも選択してないとき
+					else{
 						isEdittingTSUNAGI = true
 						console.log('isEdittingTSUNAGI: ', isEdittingTSUNAGI)
 						tsunagiNodeID1 = nearestMarkerID
+						console.log('tsunagiNodeID1: ', tsunagiNodeID1)
 					}					
 				}
 				// optionキー ∩ 長クリック
@@ -517,10 +528,19 @@ export default {
 		console.log('sketchInstance: ', sketchInstance)
 	},
 	watch: {
+		// :::プリセットカラクリを選択したとき
 		selectedKarakuri(val) {
 			if (val == 'drawHuman') {
-				this.edges = defaultEdges
+				this.edges.splice(0)		
+				defaultEdges.forEach(edge=>{
+					const vec = edge
+					this.edges.push(vec)				
+				})						
+				console.log('this.edges: ', this.edges)	
 			}
+			// else if(val == 'drawTrails'){
+			// 	drawTrails(p, )
+			// }
 		},
 	},
 }

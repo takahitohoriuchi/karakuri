@@ -1,19 +1,36 @@
 <template>
 	<v-app>
 		<!-- NOTE:この部分は、全ページ共通。∴ページ遷移時も「更新」されないのだ。 -->
-		<v-app-bar app color="base" dark>
+		<v-app-bar app color="white"  height="100">
 			<div class="d-flex align-center">
 				<v-app-bar-title>KARAKURI</v-app-bar-title>
 				<!-- ここにv-imgでロゴ -->
 			</div>
 			<v-spacer></v-spacer>
-			<!-- SECTION:ナビゲーション -->
-			<v-btn text @click="$router.push({ name: 'home', params: { memberDocData0: memberDocData } })">HOME</v-btn>
-			|
-			<v-btn text @click="$router.push({ name: 'mypage', params: { memberDocData0: memberDocData } })">マイページ</v-btn>
-			|
-			<v-btn text @click="$router.push({ name: 'play', params: { memberDocData0: memberDocData } })">再生ビュー</v-btn>
+			<v-app-bar-nav-icon class="mx-5" height=80 width="80" @click.stop="showMenu"></v-app-bar-nav-icon>		
 		</v-app-bar>
+
+		<v-navigation-drawer right v-model="drawer" absolute temporary>
+			<v-list>
+				<v-list-item-group active-class="blue--text text--accent-4">	
+					<v-list-item						
+						@click="$router.push({ name: 'home', params: { memberDocData0: memberDocData } })"
+					>
+						<v-list-item-title>HOME</v-list-item-title>
+					</v-list-item>
+					<v-list-item						
+						@click="$router.push({ name: 'mypage', params: { memberDocData0: memberDocData } })"
+					>
+						<v-list-item-title>My Page</v-list-item-title>
+					</v-list-item>
+					<v-list-item						
+						@click="$router.push({ name: 'play', params: { memberDocData0: memberDocData } })"
+					>
+						<v-list-item-title>Play Page</v-list-item-title>
+					</v-list-item>
+				</v-list-item-group>
+			</v-list>
+		</v-navigation-drawer>
 
 		<v-main>
 			<!-- NOTE:↓に指定のルーティングページの<template>が読み込まれるってこと！ -->
@@ -25,14 +42,23 @@
 <script>
 // DEBUG:このutilsは名前を変えて、firestore.jsに直接こうした関数を書き込む OR utilsじゃない名前にする
 // import { getMemberDocDataWithLINEuID } from './modules/utils.js'
-import /* onAuthStateChanged */ 'firebase/auth'
-import /* auth */ '@/modules/authentication.js'
-import /* getMemberDocDataWithMemberID */ './modules/firestoreUtils'
+import {/* onAuthStateChanged */} from 'firebase/auth'
+import {/* auth */} from '@/modules/authentication.js'
+import {/* getMemberDocDataWithMemberID */} from './modules/firestoreUtils'
 export default {
 	name: 'App',
 	data: () => ({
 		memberDocData: {},
+		// メニュー展開するかいなか
+		drawer: false,
 	}),
+	methods: {
+		// ナビゲーションメニュー
+		showMenu() {
+			this.$vuetify.goTo(0) //一番上までスクロール
+			this.drawer = !this.drawer //ドロワー表示
+		},
+	},
 	created: async function () {
 		document.title = 'カラクリ'
 	},

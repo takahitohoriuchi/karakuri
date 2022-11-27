@@ -111,9 +111,9 @@ export function get2dPosFrom3dPos(_vec3d, _camParams){
 export function getNearestMarkerID(_tempDrawPlots, _activeMarkers, _mousePos, _camParams){
     const radius = 30
 	// すべてのマーカーの画面2D座標を算出して、配列に格納
-	let marker2dVecs = Object.entries(_tempDrawPlots).map(([k, v], i) => {
+	let marker2dVecs = Object.entries(_tempDrawPlots).map(([k, v]) => {
         // アクティブマーカーのみ
-        if(_activeMarkers.includes(i)){
+        if(_activeMarkers.includes(k)){
             const vec2d = get2dPosFrom3dPos([v.x, v.y, v.z], _camParams)
 			const dist = Math.sqrt(Math.pow(_mousePos[0] - vec2d[0], 2) + Math.pow(_mousePos[1] - vec2d[1], 2))
 			const obj = {

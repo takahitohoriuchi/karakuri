@@ -39,7 +39,7 @@ export function drawCoordinate(_p, _axLen = 100, _dotSize = 5) {
  */
 export function drawSphere(_p, _r){
 	_p.noFill()
-	_p.strokeWeight(0.11)
+	_p.strokeWeight(0.3)
 	_p.stroke(255, 255, 255)
 	_p.sphere(_r)
 }
@@ -61,9 +61,9 @@ export function drawPlots(_p, _tempPlot, _activeMarkers, _nearestMarkerID, _camP
 
 	*/
 	// dが大きくなるほど、20.0のminSizeをでかくする	
-	Object.entries(_tempPlot).forEach(([key, value], i) => {
+	Object.entries(_tempPlot).forEach(([key, value]) => {
 		// アクティブマーカーだけ描画
-		if (_activeMarkers.includes(i)) {
+		if (_activeMarkers.includes(key)) {
 			// マーカー（点）の描画
 			const x = value.x
 			const y = value.y
@@ -72,24 +72,26 @@ export function drawPlots(_p, _tempPlot, _activeMarkers, _nearestMarkerID, _camP
 			const dotSize = comDist*0.05 + 50.0 * (300.0-camDist) / 300.0//NOTE:10ポイント（距離300）を基準にする。距離300はカメラ-原点の初期距離			
 						
 			_p.strokeWeight(dotSize)
-			if (key == 'COM') {//重心は黄色
-				_p.stroke('#fcf403')
-			} else if(key == _nearestMarkerID){
+			if (key == _nearestMarkerID) {
 				_p.stroke('rgba(100%, 5.9%, 45.1%, 0.9)') //マウス最近傍はピンク ∩ デカい
 				// _p.stroke('#5f5f5f') //マウス最近傍はピンク ∩ デカい
 				_p.strokeWeight(dotSize * 1.5)
-			}else {//その他は黒っぽい
-				_p.stroke('#1f1f1f')
-			}						
+			} else {
+				if (key == 'COM') {
+					//重心は黄色
+					_p.stroke('#fcf403')
+				}else{
+					//その他は黒っぽい
+					_p.stroke('#1f1f1f')
+				}				
+			}	
+			
+								
 			_p.beginShape(_p.POINTS)
 			_p.vertex(x, y, z)
 			_p.endShape()						
 		}
 	})
-
-	// _p.stroke('rgba(100%, 5.9%, 45.1%, 0.7)')
-	// _p.ellipse(x, y, w, [h])
-	// console.log('nijigens: ', nijigens)
 }
 
 /**
@@ -105,14 +107,14 @@ export function drawMarkerLabels(_p, _tempPlot, _activeMarkers, _theta, _phi) {
 	_p.stroke(255)
 	_p.strokeWeight(4)
 
-	Object.values(_tempPlot).forEach((value, i) => {
+	Object.entries(_tempPlot).forEach(([k,v]) => {
 		// console.log('key: ', key)
 		// アクティブマーカーだけ描画
-		if (_activeMarkers.includes(i)) {
+		if (_activeMarkers.includes(k)) {
 			// マーカーの位置
-			const x = value.x
-			const y = value.y
-			const z = value.z			
+			const x = v.x
+			const y = v.y
+			const z = v.z			
 			// マーカー名の描画
 			_p.push()
 			_p.translate(x, y, z)
@@ -120,15 +122,13 @@ export function drawMarkerLabels(_p, _tempPlot, _activeMarkers, _theta, _phi) {
 			_p.rotateX(-_phi)			
 			_p.rotateZ(Math.PI)
 			_p.fill('#eeeeee')
-			_p.text(`${value.name}`, 0, 0)
+			_p.text(`${v.name}`, 0, 0)
 			_p.pop()
 		}
 	})
 }
 
-export function drawRope(_p, _tempPlots, _tsunagiNodeID1, _tsunagiNodeID2, _camParams) {
-	console.log('_tsunagiNodeID1: ', _tsunagiNodeID1)
-	console.log('_tsunagiNodeID2: ', _tsunagiNodeID2)
+export function drawRope(_p, _tempPlots, _tsunagiNodeID1, _tsunagiNodeID2, _camParams) {		
 	// 代入
 	const node1 = _tempPlots[_tsunagiNodeID1]
 	const node2 = _tempPlots[_tsunagiNodeID2]

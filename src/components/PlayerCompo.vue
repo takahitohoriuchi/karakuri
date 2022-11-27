@@ -77,7 +77,7 @@ export default {
 				frameCount: 0,
 			},
 			tempFrameCount: null,
-			speedList: [0.1, 0.2, 0.5, 1.0, 1.5, 2.0],
+			speedList: [0.5, 1.0, 2.0],
 			speed: 1.0,
 			slider: {
 				min: 0,

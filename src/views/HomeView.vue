@@ -31,7 +31,8 @@ export default {
 	// SECTION:ビュー読み込み前処理
 	created: async function () {
 		this.memberDocData = this.$memDocData
-		console.log('memberDocData@HomeView: ', this.memberDocData)			
+		console.log('memberDocData@HomeView: ', this.memberDocData)	
+		this.$router.push({ name: 'mypage'})		
 	},
 	mounted: function () {
 		console.log('Domマウント完了（@HomeView.vue)')

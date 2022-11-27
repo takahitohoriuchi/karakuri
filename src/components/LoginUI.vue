@@ -48,6 +48,7 @@ export default {
 		async tryLogIn() {
 			try {
 				this.userInfo = await logIn(this.userEmail, this.userPassword)
+				this.$router.push({ name: 'mypage'})
 			} catch (error) {
 				console.log(error)
 			}
@@ -56,6 +57,7 @@ export default {
 			try {
 				this.userInfo = await signUp(this.userEmail, this.userPassword)
                 this.memberDocData = {
+					dataIDs: ['test'],
                     memberID: this.userInfo.uid,
                     email: this.userInfo.email,
                     displayName: this.userInfo.displayName,

@@ -4,30 +4,29 @@
 		<v-navigation-drawer v-model="isLeftMenu" :width=500 temporary absolute>
 			<v-list>
 				<v-list-item class="px-2">
+					
+					<v-list-item-title class="text-h6"><h2>カラクリUI</h2></v-list-item-title>
 					<v-list-item-avatar size="80">
 						<v-img :src=photoURL></v-img>
 					</v-list-item-avatar>
-					<v-list-item-title class="text-h6"><h2>カラクリUI</h2></v-list-item-title>
-				</v-list-item>
-
+				</v-list-item>						
 				<v-list-item>
 					<v-list-item-content>						
-						<v-list-item-subtitle>あれこれ設定</v-list-item-subtitle>
+						<v-list-item-subtitle>ここからも	いじくろう</v-list-item-subtitle>
 					</v-list-item-content>
 				</v-list-item>
 			</v-list>
 			<v-divider></v-divider>
 			<v-expansion-panels accordion multiple :value="[0, 1, 2, 3, 4, 5]">
 				<!-- キャメラeffects -->
-				<v-expansion-panel>
+				<!-- <v-expansion-panel>
 					<v-expansion-panel-header>{{ panelMenu[0].name }}</v-expansion-panel-header>
 					<v-expansion-panel-content>
 						<v-chip-group v-model="camLookAtMarkers" column>
 							<v-chip v-for="info in dataInfo" :key="info.name" filter outlined @click="emitCamerer(info.id)">{{ info.name }}</v-chip>
-						</v-chip-group>
-						<!-- <v-switch v-model="isShowCoordinate" inset label="座標系の表示"></v-switch> -->
+						</v-chip-group>						
 					</v-expansion-panel-content>
-				</v-expansion-panel>
+				</v-expansion-panel> -->
 				<!-- ベーシックカラクリ -->
 				<v-expansion-panel>
 					<v-expansion-panel-header>{{ panelMenu[1].name }}</v-expansion-panel-header>
@@ -57,15 +56,18 @@
 					<v-expansion-panel-header>{{ panelMenu[2].name }}</v-expansion-panel-header>
 					<v-expansion-panel-content>
 						<v-container
-							><v-row>
-								<v-col><v-btn @click="deleteAllActiveMarkers">すべて非表示</v-btn></v-col>
-								<v-col><v-btn @click="setAllActiveMarkers">すべて表示</v-btn></v-col>
-							</v-row></v-container
-						>
-						<v-switch v-model="isShowMarkerLabels" inset label="ラベルの表示"></v-switch>
-						<v-chip-group v-model="activeMarkers" column multiple>
+							><v-row>								
+								<v-col cols="5"><v-btn @click="updateAllActiveMarkers">すべて表示/非表示</v-btn></v-col>
+								<v-col cols="5"><v-btn @click="updateActiveMarkers(edges)">孤立ノード非表示</v-btn></v-col>
+							</v-row>
+							<v-row>
+								<v-switch v-model="isShowMarkerLabels" inset label="ラベルも見る？"></v-switch>
+							</v-row>						
+						</v-container>
+						<!-- NOTE:20221029activeMarkerを整数値配列から、マーカーID配列にかえた -->
+						<!-- <v-chip-group v-model="activeMarkers" column multiple>
 							<v-chip v-for="info in dataInfo" :key="info.name" filter outlined>{{ info.name }}</v-chip>
-						</v-chip-group>
+						</v-chip-group> -->
 					</v-expansion-panel-content>
 				</v-expansion-panel>
 				<!-- その他表示設定 -->
@@ -143,17 +145,13 @@ export default {
 				{
 					name: '軌跡',
 					func: 'drawTrails'
-				},
-				{
-					name: '鏡像',
-					func: 'drawMirror',
-				},
+				},	
 			],
 			selectedKarakuriIndex: 0,
 			trail: 10,
-			dataInfo: null,
+			dataInfo: [],
 			activeMarkers: [],
-			camLookAtMarkers: [],
+			// camLookAtMarkers: [],
 			isEdittingLength2: false,
 			// panel:
 			panelMenu: [
@@ -162,11 +160,11 @@ export default {
 					content: 'う',
 				},
 				{
-					name: 'ベーシックカラクリ',
+					name: 'プリセットカラクリ',
 					content: 'い',
 				},
 				{
-					name: 'マーカー表示',
+					name: '丸の表示',
 				},
 				{
 					name: 'その他表示設定',
@@ -221,6 +219,7 @@ export default {
 		isDoneLoading: Boolean,
 		photoURL: String,
 		isEdittingLength: Boolean,
+		edges: Array
 	},
 	// SECTION:関数
 	methods: {
@@ -228,28 +227,45 @@ export default {
 			// this.$emit('emitKarakurier', _karakuriFunc, _options)			
 			this.$emit('emitKarakurier', _karakuriFunc)
 		},
-		emitCamerer(_markerId) {
-			this.camerer.lookAt = _markerId
-			console.log('this.camerer.lookAt: ', this.camerer.lookAt)
-			this.$emit('emitCamerer', this.camerer)
-		},
+		// emitCamerer(_markerId) {
+		// 	this.camerer.lookAt = _markerId
+		// 	console.log('this.camerer.lookAt: ', this.camerer.lookAt)
+		// 	this.$emit('emitCamerer', this.camerer)
+		// },
 		// emitDisplayer() {
 		// 	this.$emit('emitDisplayer', this.)
 		// },
 		loadDataInfo(_dataInfo) {
 			//NOTE::親のPlayViewから発火させられるメソッド
 			this.dataInfo = _dataInfo
-			this.activeMarkers = [...Array(this.dataInfo.length)].map((_, i) => i) //NOTE:v-chipのfilterは、整数値の配列にすることに注意。
-			this.camLookAtMarkers = [...Array(this.dataInfo.length)].map((_, i) => i) //NOTE:v-chipのfilterは、整数値の配列にすることに注意。
+			// this.activeMarkers = [...Array(this.dataInfo.length)].map((_, i) => i) //NOTE:v-chipのfilterは、整数値の配列にすることに注意。
+			this.activeMarkers = this.dataInfo.map(markerObj=>{return markerObj.id})
+			// this.camLookAtMarkers = [...Array(this.dataInfo.length)].map((_, i) => i) //NOTE:v-chipのfilterは、整数値の配列にすることに注意。
+			console.log('this.activeMarkers: ', this.activeMarkers)
+		},							
+		updateAllActiveMarkers() {
+			if(this.activeMarkers.length > 0){
+				this.activeMarkers.splice(0)
+			}else{
+				console.log('this.dataInfo: ', this.dataInfo)
+				this.activeMarkers = this.dataInfo.map(markerObj=>{return markerObj.id})
+			}			
 			console.log('this.activeMarkers: ', this.activeMarkers)
 		},
-		deleteAllActiveMarkers() {
+		updateActiveMarkers(_edges){			
+			console.log('this.activeMarkers ', this.activeMarkers)
+			// edgesのforEachでedgeで、[0]と「１」を調べて、
+			let array = []
+			_edges.forEach(edge=>{
+				array.push(edge[0])
+				array.push(edge[1])
+			})
+			// activeMarkersを削除して、
 			this.activeMarkers.splice(0)
-			console.log('this.activeMarkers: ', this.activeMarkers)
-		},
-		setAllActiveMarkers() {
-			this.activeMarkers = [...Array(this.dataInfo.length)].map((_, i) => i)
-			console.log('this.activeMarkers: ', this.activeMarkers)
+			// そこにあるものだけ、activeMarkersに登録する。（重複削除して）
+			this.activeMarkers = Array.from(new Set(array))
+			console.log('this.activeMarkers ', this.activeMarkers)
+			
 		},
 		toggleLeftMenu() {
 			console.log('open L menu')
