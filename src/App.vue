@@ -1,16 +1,17 @@
 <template>
 	<v-app>
 		<!-- NOTE:この部分は、全ページ共通。∴ページ遷移時も「更新」されないのだ。 -->
-		<v-app-bar app color="white"  height="100">
+		<v-app-bar app hide-on-scroll scroll-threshold="20" color="white"  height="100"> 
+			<v-app-bar-nav-icon class="mx-1" height=80 width="80" @click.stop="showMenu"></v-app-bar-nav-icon>		
 			<div class="d-flex align-center">
 				<v-app-bar-title>KARAKURI</v-app-bar-title>
 				<!-- ここにv-imgでロゴ -->
 			</div>
 			<v-spacer></v-spacer>
-			<v-app-bar-nav-icon class="mx-5" height=80 width="80" @click.stop="showMenu"></v-app-bar-nav-icon>		
+			
 		</v-app-bar>
 
-		<v-navigation-drawer right v-model="drawer" absolute temporary>
+		<v-navigation-drawer v-model="drawer" absolute temporary>
 			<v-list>
 				<v-list-item-group active-class="blue--text text--accent-4">	
 					<v-list-item						

@@ -47,9 +47,11 @@ function mulMatAndVec(_m, _v) {
  * 3次元点座標から、カメラを介した画面内の二次元座標を取得
  * @param {Array} _vec3d 
  * @param {Object} _camParams 
+ * @param {Number} _W ウィンドウ幅
+ * @param {Number} _H ウィンドウ縦
  * @returns {Array} 2次元ベクトル
  */
-export function get2dPosFrom3dPos(_vec3d, _camParams){
+export function get2dPosFrom3dPos(_vec3d, _camParams, _W, _H){
 	// （１）モデル行列
 	const modelMat = Matrix4.identity().translate(0, 0, 0) //「原点」をあらわすモデル行列を用意
 	// NOTE:ここで一般には、translate(0,0,0).ratateX(Math.PI).scale(5,5,5)というふうに変換してく
@@ -59,7 +61,7 @@ export function get2dPosFrom3dPos(_vec3d, _camParams){
 	const lookAt = new Vector3(_camParams.lookAt[0], _camParams.lookAt[1], _camParams.lookAt[2])
 	const camUp = new Vector3(_camParams.upVec[0], _camParams.upVec[1], _camParams.upVec[2])
 	const vMat = Matrix4.lookAt(camPos, lookAt, camUp)
-	// console.log('vMat: ', vMat)
+	// console.log('vMat: ', vMat)	
 
 	// （３）プロジェクション行列
 	// もとはaspectRatioは1, nearは1, farは2ってのがある。
@@ -85,8 +87,8 @@ export function get2dPosFrom3dPos(_vec3d, _camParams){
 	// console.log('pos（w徐算後）: ', pos)
 
 	// （５）ビューポート変換（スクリーン２次元座標へ）
-	const W = 1600
-	const H = 900
+	const W = _W
+	const H = _H
 	const viewPortMat = [
 		W / 2, 0, 0, 0,
 		0, H / 2, 0, 0,
@@ -94,9 +96,12 @@ export function get2dPosFrom3dPos(_vec3d, _camParams){
 		W / 2, H / 2, (_camParams.far + _camParams.near) / 2, 1,//NOTE:3つめはこれであってるのか謎
 	]
 	const finalPos = mulMatAndVec(viewPortMat, pos)
+	// DEBUG:finalPosフィナl歩shあおかしくない
+	// console.log('finalPos: ',finalPos)
 	// console.log('finalPos: ', finalPos)
 
     const resultVec2d = [finalPos[0], finalPos[1]]
+	// console.log('resultVec2d: ', resultVec2d)
     return resultVec2d
 }
 
@@ -108,13 +113,13 @@ export function get2dPosFrom3dPos(_vec3d, _camParams){
  * @param {Object} _camParams カメラパラメータ
  * @returns 
  */
-export function getNearestMarkerID(_tempDrawPlots, _activeMarkers, _mousePos, _camParams){
+export function getNearestMarkerID(_tempDrawPlots, _activeMarkers, _mousePos, _camParams, _W, _H){
     const radius = 30
 	// すべてのマーカーの画面2D座標を算出して、配列に格納
 	let marker2dVecs = Object.entries(_tempDrawPlots).map(([k, v]) => {
         // アクティブマーカーのみ
         if(_activeMarkers.includes(k)){
-            const vec2d = get2dPosFrom3dPos([v.x, v.y, v.z], _camParams)
+            const vec2d = get2dPosFrom3dPos([v.x, v.y, v.z], _camParams, _W, _H)
 			const dist = Math.sqrt(Math.pow(_mousePos[0] - vec2d[0], 2) + Math.pow(_mousePos[1] - vec2d[1], 2))
 			const obj = {
 				ID: k,

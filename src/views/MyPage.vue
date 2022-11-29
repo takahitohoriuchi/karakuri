@@ -2,7 +2,7 @@
 	<div>
 		<LoginUI v-if="memberDocData == null" />
 		<!-- {{ memberDocData }} -->
-		<h2 class="my-10">{{ userName }}さん</h2>
+		<h2 class="my-10">{{ userName }}</h2>
 		<v-container class="my-10">
 			<v-row justify="center">
 				<v-img v-if="photoURL" class="round" max-height="200" max-width="200" :src="photoURL"></v-img>
@@ -26,9 +26,9 @@
 				<v-col cols="3"><v-btn v-if="file" dark x-large @click="update">プロフィール画像を更新する</v-btn></v-col>
 			</v-row>
 		</v-container>
-		<v-divider></v-divider>
+		<!-- <v-divider></v-divider> -->
 		<v-card class="mx-auto" max-width="500">
-			<v-card-title> 保存データ一覧 </v-card-title>
+			<v-card-title> My Plots </v-card-title>
 			<v-card-text>
 				<v-list>
 					<!-- <v-list-item-group v-model="selectedData"> -->

@@ -1,6 +1,6 @@
 <template>
 	<div class="play">
-		<v-card>
+		
 			<v-container v-if="!isDoneLoading">
 				<v-row justify="center" height="300px" @dragover.prevent @dragenter="onDragEnter" @dragleave="onDragLeave" @drop="onDrop">
 					<v-col cols="3"></v-col>
@@ -21,13 +21,7 @@
 				</v-row>
 			</v-container>
 			<!-- :::p5スケッチ -->
-			<v-container>
-				<v-row>
-					<!-- <v-col cols="1"><v-btn @click="$refs.controller.toggleLeftMenu()">Lmenu</v-btn></v-col> -->
-					<v-col cols="10"><span id="sketch"></span></v-col>
-					<!-- <v-col cols="1"><v-btn @click="$refs.controller.toggleRightMenu()">Rmenu</v-btn></v-col> -->
-				</v-row>
-			</v-container>
+			<v-col cols="10"><span id="sketch"></span></v-col>															
 			<!-- :::PlayerCompo（再生操作） -->
 			<PlayerCompo ref="player" :isDoneLoading="isDoneLoading" :frameNum="frameNum" :frameCount="frameCount" @emitPlayer="catchFromPlayerCompo" />
 			<EditorCompo :memberID="memberDocData.memberID" :isDoneLoading="isDoneLoading" :markeredData="markeredData" />
@@ -39,10 +33,10 @@
 				:photoURL="memberDocData.photoURL"
 				:isEdittingLength = "isEdittingLENGTH"
 				:edges = "edges"
-				@emitKarakurier="catchKarakurierFromController"				
+				@emitKarakurier="catchKarakurierFromController"	
+				@emitCurrentHyojo="setCurrentHyojo"		
 			/>
-			<!-- NOTE:emitCamererを一旦削除 -->
-		</v-card>
+			<!-- NOTE:emitCamererを一旦削除 -->		
 	</div>
 </template>
 
@@ -54,7 +48,7 @@ import EditorCompo from '@/components/EditorCompo.vue'
 import SawarabiGothic from '@/assets/fonts/sawarabi-gothic-medium.ttf'
 import { genMarkeredData, genFramedData, loadMarkeredData } from '@/modules/loadData.js'
 import p5 from 'p5'
-import { drawCoordinate, drawMarkerLabels, drawPlots, drawRope, updateFrameCount, updateCam, windowResized, drawSphere, drawHolding } from '@/modules/p5utils'
+import { drawCoordinate, drawMarkerLabels, drawPlots, drawRope, updateFrameCount, updateCam, windowResized, drawSphere, drawHolding, drawHyojoOnomatopoeia } from '@/modules/p5utils'
 import { updateTempRate, defaultEdges, drawEdges, drawHuman, drawSHINSHUKU, drawTrails, initTempSHINSHUKU, setTempSHINSHUKU, skeletonModel, updateEdges, updateFramedData } from '@/modules/karakuri'
 import { get2dPosFrom3dPos, getNearestMarkerID } from '@/modules/otherUtils.js'
 // グローバル変数
@@ -109,10 +103,10 @@ export default {
 			markeredData: [], //データ:マーカーごとver.（SEE:loadData.js）構造は、[{マーカー1の全コマデータ}, {マーカー2の全コマデータ}, ...（以下マーカーの数だけ続く）]
 			framedData: [], //データ：コマごとver.（SEE:loadData.js）構造は、[{コマ1の全マーカーデータ}, {コマ2の全マーカーデータ}, ...（以下コマの数だけ続く）]
 			edges: [], //どのマーカーどうしを結んでるか？デフォでは、karakuri.jsのedgesから代入。
-			dataInfo: null, //↑markeredDataのうち、マーカー名一覧・フレーム数をとって加工
-			isDoneLoading: false,
-			skeleton: skeletonModel,
-			selectedKarakuri: null,
+			dataInfo: null, //↑markeredDataのうち、マーカー名一覧・フレーム数をとって加工			
+			skeleton: skeletonModel,//マーカーの親子関係と、各親子のボーン拡大/縮小率の情報
+			selectedKarakuri: null,//現在選ばれてるプリセットカラクリ from ControllerCompo
+			currentHyojo: null,//現在選択されてる「表情オブジェクト」 from ControllerCompo
 			state: 'stop',
 			frameCount: 0,
 			frameNum: null,
@@ -125,6 +119,7 @@ export default {
 			isDragging: false,
 			dragCount: 0,
 			isEdittingLENGTH: false,
+			isDoneLoading: false,
 			
 		}
 	},
@@ -138,8 +133,11 @@ export default {
 			updatePlots(this.frameCount, this.framedData)
 		},
 		catchKarakurierFromController(_selectedKarakuri) {
-			this.selectedKarakuri = _selectedKarakuri
-			//NOTE:watch()起動。edges[]を更新する。
+			this.selectedKarakuri = _selectedKarakuri//NOTE:watch()起動。edges[]を更新する。
+		},
+		setCurrentHyojo(_currentHyojo){
+			this.currentHyojo = _currentHyojo
+			console.log('this.currentHyojo in PlayView: ', this.currentHyojo)
 		},
 		// catchCamererFromController(_camerer) {
 		// 	this.camLookAt = _camerer.lookAt
@@ -274,22 +272,25 @@ export default {
 				rate: 1.0,
 				p2cVec2d: null,//子ノード-親ノード
 				p2cVec3d: null
-			}			
-						
+			}									
 			function fontRead() {
 				fontReady = true
-			}
-
-			
+			}			
 			// マウス最近傍マーカーを取得
 			function getNearestMarkerID0() {
 				// マウスがキャンバス内にあったら
 				const m = [p.mouseX, p.mouseY]
 				if (m[0] >= 0 && m[0] < W && m[1] >= 0 && m[1] < H) {
-					return getNearestMarkerID(plots[preIndex], thi.$refs.controller.activeMarkers, m, camParams)
+					return getNearestMarkerID(plots[preIndex], thi.$refs.controller.activeMarkers, m, camParams, W,H)
 				} else {
 					return null
 				}
+			}
+			p.windowResized = () =>{
+				W = p.windowWidth
+				H = p.windowHeight
+				p.resizeCanvas(W, H)
+				camParams.aspect = W/H
 			}
 			p.preload = () => {
 				// font = p.loadFont('../assets/sawarabi-mincho-medium.ttf')
@@ -303,12 +304,17 @@ export default {
 					p.textSize(10)
 					p.textAlign('CENTER', 'CENTER')
 				})
+				W = p.windowWidth
+				H = p.windowHeight
+				console.log('W: ', W)
+				console.log('H: ', H)
 				p.createCanvas(W, H, p.WEBGL)
 				p.setAttributes('alpha', false)
 				cam = p.createCamera()
 				// NOTE:【p5公式のミス】・・・cam.camera()の引数(7,8,9)番目は、(upY, upX, upZ)の順番？？？(upX,upY,upZ)じゃない！！！！！ cam.camera(0, 0, 78, 0, 0, 0, 0, 0, -1, 0)//これにするとupZが-1になって、 cam.camera(0, 0, 78, 0, 0, 0, 0, 0, 0, -1)//これにするとupZが0になる
 				cam.camera(0, 0, 300, 0, 0, 0, 0, -1, 0, 0) //これにすると所望通り、upYが-1になる。
 				// ↓Projection行列に相当？？
+				camParams.aspect = W / H
 				cam.perspective(camParams.fovy, camParams.aspect, camParams.near, camParams.far)
 				console.log('cam: ', cam)
 				console.log('trailLength: ', trailLength)
@@ -336,7 +342,7 @@ export default {
 				if (this.isDoneLoading) {
 					const t = this.frameCount
 					const OPTIONKEY = p.keyIsDown(p.OPTION) || p.keyIsDown(p.ALT) ? true : false
-					const bgColor = OPTIONKEY ? 100 : 200
+					const bgColor = OPTIONKEY ? 90 : 150
 					p.background(bgColor)
 
 					// 座標系の描画
@@ -381,6 +387,7 @@ export default {
 						camParams.upVec[1],
 						camParams.upVec[2]
 					)
+					drawHyojoOnomatopoeia(p, plots[preIndex], this.currentHyojo, camParams)
 					// ⌥キー ∩ クリック中 ∩ 最近傍マーカーあり
 					if(OPTIONKEY && p.mouseIsPressed && nearestMarkerID){
 						//マウス「ぐーーっ」て押しっぱカウントup					
@@ -392,7 +399,7 @@ export default {
 						if(!this.isEdittingLENGTH && mousePushDuration > 40){
 							this.isEdittingLENGTH = true
 							console.log('nearestMarkerID: ', nearestMarkerID)								
-							setTempSHINSHUKU(p, plots[preIndex], tempSHINSHUKU, nearestMarkerID, camParams)								
+							setTempSHINSHUKU(p, plots[preIndex], tempSHINSHUKU, nearestMarkerID, camParams, W, H)								
 						}
 					
 					}		
@@ -455,7 +462,7 @@ export default {
 						// むすぶ/ほどくを実行
 						updateEdges(this.edges, tsunagiNodeID1, tsunagiNodeID2)
 						isEdittingTSUNAGI = false
-						tsunagiNodeID1 = null, tsunagiNodeID2 = null
+						tsunagiNodeID1 = null, tsunagiNodeID2 = null												
 					}					
 					// tsunagiNodeIDをまだどちらも選択してないとき
 					else{
@@ -463,6 +470,7 @@ export default {
 						console.log('isEdittingTSUNAGI: ', isEdittingTSUNAGI)
 						tsunagiNodeID1 = nearestMarkerID
 						console.log('tsunagiNodeID1: ', tsunagiNodeID1)
+						
 					}					
 				}
 				// optionキー ∩ 長クリック
@@ -528,7 +536,7 @@ export default {
 		console.log('sketchInstance: ', sketchInstance)
 	},
 	watch: {
-		// :::プリセットカラクリを選択したとき
+		// :::プリセットカラクリを選択したとき一回起動
 		selectedKarakuri(val) {
 			if (val == 'drawHuman') {
 				this.edges.splice(0)		
@@ -537,10 +545,20 @@ export default {
 					this.edges.push(vec)				
 				})						
 				console.log('this.edges: ', this.edges)	
-			}
-			// else if(val == 'drawTrails'){
-			// 	drawTrails(p, )
-			// }
+			}else if(val == 'detatchAll'){
+				this.edges.splice(0)
+			}else if(val == 'attatchAll'){
+				this.edges.splice(0)
+				this.dataInfo.forEach((marker1,i)=>{
+					this.dataInfo.forEach((marker2,j)=>{
+						// すべてのエッジをつなげてから
+						if(i < j){
+							this.edges.push([marker1.id, marker2.id])
+						}						
+
+					})										
+				})				
+			}									
 		},
 	},
 }

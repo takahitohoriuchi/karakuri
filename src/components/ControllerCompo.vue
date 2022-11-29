@@ -1,7 +1,7 @@
 <template>
 	<span v-if="isDoneLoading">
-		<!-- SECTION:左メニュー -->
-		<v-navigation-drawer v-model="isLeftMenu" :width=500 temporary absolute>
+		<!-- :::左メニュー -->
+		<v-navigation-drawer v-model="isLeftMenu" :width=500  absolute>
 			<v-list>
 				<v-list-item class="px-2">
 					
@@ -12,21 +12,12 @@
 				</v-list-item>						
 				<v-list-item>
 					<v-list-item-content>						
-						<v-list-item-subtitle>ここからも	いじくろう</v-list-item-subtitle>
+						<v-list-item-subtitle>Let's tinker around.	</v-list-item-subtitle>
 					</v-list-item-content>
 				</v-list-item>
 			</v-list>
 			<v-divider></v-divider>
-			<v-expansion-panels accordion multiple :value="[0, 1, 2, 3, 4, 5]">
-				<!-- キャメラeffects -->
-				<!-- <v-expansion-panel>
-					<v-expansion-panel-header>{{ panelMenu[0].name }}</v-expansion-panel-header>
-					<v-expansion-panel-content>
-						<v-chip-group v-model="camLookAtMarkers" column>
-							<v-chip v-for="info in dataInfo" :key="info.name" filter outlined @click="emitCamerer(info.id)">{{ info.name }}</v-chip>
-						</v-chip-group>						
-					</v-expansion-panel-content>
-				</v-expansion-panel> -->
+			<v-expansion-panels accordion multiple :value="[0, 1, 2, 3, 4, 5]">				
 				<!-- ベーシックカラクリ -->
 				<v-expansion-panel>
 					<v-expansion-panel-header>{{ panelMenu[1].name }}</v-expansion-panel-header>
@@ -35,20 +26,7 @@
 							<v-chip v-for="karakuri in karakuris" :key="karakuri.name" @click="emitKarakurier(karakuri.func)" filter outlined>{{
 								karakuri.name
 							}}</v-chip>
-						</v-chip-group>
-						<!-- <v-container v-if="karakuris[selectedKarakuriIndex].name == '軌跡'">
-							<v-row>
-								<v-slider
-							label="軌跡の長さ"
-							v-model="trail"
-							:min=20
-							:max=10
-							:thumb-size="20"
-							@change="emitKarakurier(karakuri.func, {trailLength: trail})"
-							thumb-label="always"
-						></v-slider>
-							</v-row>
-						</v-container> -->
+						</v-chip-group>						
 					</v-expansion-panel-content>
 				</v-expansion-panel>
 				<!-- マーカー表示 -->
@@ -80,33 +58,41 @@
 				</v-expansion-panel>
 			</v-expansion-panels>
 		</v-navigation-drawer>
-		<!-- SECTION: 右メニュー -->
-		<v-navigation-drawer right v-model="isRightMenu" :width=400 temporary absolute>
+		<!-- ::: 右メニュー -->
+		<v-navigation-drawer hide-overlay stateless right color="rgba(255,255,255,0.6)" v-model="isRightMenu" :width=400 absolute>
+			<!-- メニューのタイトル -->
 			<v-list>
-				<!-- <v-list-item class="px-2">
-					<v-list-item-avatar>
-						<v-img src="https://gyazo.com/47bbb080bc375399ae32c48c2f7cc674/max_size/1000"></v-img>
+				<v-list-item class="px-2">					
+					<v-list-item-title class="text-h6"><h2>ことば</h2></v-list-item-title>
+					<v-list-item-avatar size="80">
+						<v-img :src=photoURL></v-img>
 					</v-list-item-avatar>
-				</v-list-item> -->
+				</v-list-item>						
 				<v-list-item>
-					<v-list-item-content>
-						<v-list-item-title class="text-h6"><h3>キー操作</h3></v-list-item-title>
-						<v-list-item-subtitle>はこうやれ</v-list-item-subtitle>
-					</v-list-item-content>
-				</v-list-item>
-				<v-divider></v-divider>
-
-				<v-list-item three-line v-for="(item, i) in how2ControllWithKey" :key="i">
-					<v-list-item-icon
-						><v-icon>{{ item.icon }}</v-icon></v-list-item-icon
-					>
-					<v-list-item-content>
-						<v-list-item-title class="text-h6"> {{ item.controllname }}</v-list-item-title>
-						<v-list-item-subtitle>{{ item.discription }}</v-list-item-subtitle>
-						<v-list-item-subtitle>{{ item.keyname }}</v-list-item-subtitle>
+					<v-list-item-content>						
+						<v-list-item-subtitle>象りと指し示し</v-list-item-subtitle>
 					</v-list-item-content>
 				</v-list-item>
 			</v-list>
+			<!-- メタ認知 -->
+			<div class="pa-3">
+				<v-chip-group column active-class="primary" v-model="currentHyojo">
+					<v-chip large close v-for="(item, i) in kotobas" :key="i" :value="item" @click:close="removeHyojo(i)"><v-icon left></v-icon>{{item.onomatopoeia}}</v-chip>					
+					<v-chip large @click="addKotoba"><v-icon>mdi-plus</v-icon></v-chip>
+				</v-chip-group>
+				
+				<div class="my-5" v-if="currentHyojo">
+					<v-text-field outlined rounded label="表情名" v-model="currentHyojo.onomatopoeia"></v-text-field>				
+					<v-textarea filled class="text-body-1" auto-grow label="つらつら記述" v-model="currentHyojo.text"></v-textarea>
+					<v-container>
+					<v-row justify="end">
+						<!-- <v-switch inset v-model="currentHyojoLock" label="現在のカラクリと紐づける"></v-switch> -->
+						<v-btn class="mx-5" @click="updateHyojoKarakuri">現在のカラクリと紐付ける</v-btn>
+						<v-btn icon @click=kotobas.splice(i,1)><v-icon large>mdi-delete-circle</v-icon></v-btn>
+					</v-row>						
+					</v-container>
+				</div>						
+			</div>								
 		</v-navigation-drawer>
 	</span>
 </template>
@@ -115,6 +101,9 @@
 import Open from '@/assets/sounds/open.mp3'
 import Close from '@/assets/sounds/close.mp3'
 import Nijimi from '@/assets/sounds/nijimi.mp3'
+import Attatch from '@/assets/sounds/attatch.mp3'
+import Detatch from '@/assets/sounds/detatch.mp3'
+import HyojoIcon from '@/assets/images/hyojo.png'
 
 export default {
 	name: 'ControllerCompo',
@@ -137,10 +126,18 @@ export default {
 				{
 					name: 'なし',
 					func: null,
-				},
+				},				
 				{
 					name: '基本棒人間',
 					func: 'drawHuman',
+				},
+				{
+					name: '全リセット',
+					func: 'detatchAll',
+				},
+				{
+					name: '全連結',
+					func: 'attatchAll'
 				},
 				{
 					name: '軌跡',
@@ -164,53 +161,34 @@ export default {
 					content: 'い',
 				},
 				{
-					name: '丸の表示',
+					name: '●の表示',
 				},
 				{
 					name: 'その他表示設定',
 					content: 'あ',
 				},
 			],
-			how2ControllWithKey: [
+			currentHyojo: null,
+			currentHyojoLock : false,
+			kotobas: [
 				{
-					icon: 'mdi-apple-keyboard-control',
-					controllname: '再生/一時停止',
-					discription: '',
-					keyname: 'スペースキー',
-				},
-				{
-					icon: '→/←',
-					controllname: 'コマ送り/戻し',
-					discription: '※一時停止中のみ',
-					keyname: '左右矢印キー',
-				},
-				{
-					controllname: 'ズームin/out',
-					discription: '（to カメラ注視点）',
-					keyname: 'shift + scroll(等)',
-				},
-				{
-					icon: "'mdi-apple-keyboard-shift'",
-					controllname: 'カメラ移動',
-					discription: '（カメラ注視点まわり）',
-					keyname: 'shift + ドラッグ',
-				},
-				{
-					controllname: '左menu出し入れ',
-					discription: '',
-					keyname: '"ctrl"キー（左小指に）',
-				},
-				{
-					controllname: '右menu出し入れ',
-					discription: '',
-					keyname: ' "]}"キー（右小指に）',
-				},
+					onomatopoeia: 'さっくり',
+					text: 'なんかすごいしっくりくる',
+					// TODO:ほんとは、カメラなりマーカーなりの現在設定情報のオブジェクト
+					// TODO:何コマから何コマかも保存されている
+				}
 			],
 			sounds: {
 				open: new Audio(Open),
 				close: new Audio(Close),
-				nijimi: new Audio(Nijimi)
+				nijimi: new Audio(Nijimi),
+				attatch: new Audio(Attatch),
+				detatch: new Audio(Detatch),
 			},
+			icons: {
+				HyojoIcon
+			},
+			
 		}
 	},
 	props: {
@@ -303,6 +281,29 @@ export default {
 					break
 			}
 		},
+		addKotoba(){
+			const kotobaObj = {
+				onomatopoeia: 'new',
+				text:'',
+			}
+			this.kotobas.push(kotobaObj)
+			const lastNum = this.kotobas.length-1
+			// this.currentHyojo = null			
+			this.currentHyojo = this.kotobas[lastNum]
+			console.log('this.currentHyojo: ', this.currentHyojo)
+		},
+		removeHyojo(_i){
+			if(confirm('削除していいですか？')){
+				this.kotobas.splice(_i,1)
+			}
+			
+		},
+		showcurrentHyojo(){
+			console.log('this.currentHyojo: ', this.currentHyojo)
+		},
+		updateHyojoKarakuri(){
+
+		}
 	},
 	watch: {
 		isEdittingLength(val){
@@ -310,7 +311,12 @@ export default {
 			if(val == true){				
 				this.sounds.nijimi.play()
 			}
-		}		
+		},
+		currentHyojo(val){
+			console.log('currentHyojo: ', val)
+			this.$emit('emitCurrentHyojo', val)
+
+		}
 	},
 	// キーボード入力イベントの定義
 	mounted() {
@@ -324,4 +330,12 @@ export default {
 }
 </script>
 
-<style></style>
+
+/* DEBUG:ここにkotoba.textやkotoba.onomatopoeiaのものを書く */
+<style scoped>
+.kotoba-text.v-text-field input {
+  font-size: 0.3em;
+  padding: 0 !important;
+}
+
+</style>

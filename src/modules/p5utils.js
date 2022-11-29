@@ -55,7 +55,16 @@ export function drawSphere(_p, _r){
 export function drawPlots(_p, _tempPlot, _activeMarkers, _nearestMarkerID, _camParams) {	
 	
 	// d = 重心からカメラの距離 を測る。そのぶんを、最低ドットサイズに反映させる。
-	const com = _tempPlot['COM']
+	let com
+	if('COM' in _tempPlot){
+		com = _tempPlot['COM']
+	}else{
+		com = {
+			x: 0,
+			y: 0,
+			z: 0
+		}
+	}
 	const comDist = _p.dist(com.x, com.y, com.z, _camParams.x, _camParams.y, _camParams.z)
 	/* TODO:tempDrawPlot(plots[]の現在コマぶん)を描くのみ
 
@@ -161,6 +170,55 @@ export function drawHolding(_p, _nearestMarkerPlot, _mousePushDuration){
 	_p.beginShape(_p.POINTS)
 	_p.vertex(_nearestMarkerPlot.x, _nearestMarkerPlot.y, _nearestMarkerPlot.z)
 	_p.endShape()
+}
+
+/**
+ * 表情オノマトペを描画する
+ * @param {*} _p 
+ * @param {*} _currentHyojo 
+ * @param {*} _camParams 
+ */
+export function drawHyojoOnomatopoeia(_p, _tempPlot, _currentHyojo, _camParams){
+	if(_currentHyojo){
+		// （１）部位の描画
+		_p.stroke(0)
+		_p.strokeWeight(5)
+
+		// (2)オノマトペ
+		const onomatopoeia = _currentHyojo.onomatopoeia ? _currentHyojo.onomatopoeia : null
+
+		// (3)カメラ注視点
+		const camLookAt = _camParams.lookAt //[0,0,0]みたいな配列
+
+		// Object.entries(_tempPlot).forEach(([k, v]) => {
+		// console.log('key: ', key)
+		// アクティブマーカーだけ描画
+		if (onomatopoeia) {
+			
+			// マーカーの位置
+			const x = camLookAt[0]
+			const y = camLookAt[1]
+			const z = camLookAt[2]
+			// マーカー名の描画
+			_p.push()
+			_p.translate(x, y, z)
+			_p.rotateY(_camParams.theta)
+			_p.rotateX(-_camParams.phi)
+			_p.rotateZ(Math.PI)
+			_p.fill('#eeeeee')
+			const com = _tempPlot['COM']
+			const comDist = _p.dist(com.x, com.y, com.z, _camParams.x, _camParams.y, _camParams.z)
+			const size = 10000 / comDist			
+			console.log('onomatopoeia size: ', size)
+			_p.textSize(size)
+			_p.textAlign(_p.CENTER, _p.CENTER)
+			_p.text(`${onomatopoeia}`, 0, 0)
+			_p.pop()
+		}
+
+		// })
+	}
+	
 }
 
 

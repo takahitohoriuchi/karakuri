@@ -117,9 +117,10 @@ export default {
 		// },
 		onKeyDown(e) {
 			// console.log('押されたキー: ', e.keyCode)
-			e.preventDefault()
+			// e.preventDefault()
 			switch (e.keyCode) {
 				case 32: //スペースキー
+					e.preventDefault()
 					if (this.player.state == 'play') {
 						this.player.state = 'pause'
 					} else if (this.player.state == 'pause') {

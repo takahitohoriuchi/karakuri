@@ -7,6 +7,10 @@ plotsの形：
  */
 
 import {get2dPosFrom3dPos} from './otherUtils.js'
+import Attatch from '@/assets/sounds/attatch.mp3'
+import Detatch from '@/assets/sounds/detatch.mp3'
+const attatch = new Audio(Attatch)
+const detatch = new Audio(Detatch)
 
 // スケルトン（各マーカーのデフォ親子関係 & ボーン伸縮率）
 export const skeletonModel = {
@@ -170,11 +174,13 @@ export function updateEdges(_edges, _tsunagiNodeID1, _tsunagiNodeID2){
 	console.log('edges: ', _edges)
 	const bool = isThisEdgeExist(_edges, _tsunagiNodeID1, _tsunagiNodeID2)
 	// 選択したエッジがthis.edgesにまだなかったら
-	
+	// つける
 	if (!bool) {
 		_edges.push([_tsunagiNodeID1, _tsunagiNodeID2])
+		attatch.play()
 	}
 	// 選択したエッジがthis.edgesにすでに存在したら
+	// はずす
 	else {		
 		for(let i=0; i<_edges.length; i++){
 			if(_edges[i].includes(_tsunagiNodeID1) && _edges[i].includes(_tsunagiNodeID2)){
@@ -182,6 +188,7 @@ export function updateEdges(_edges, _tsunagiNodeID1, _tsunagiNodeID2){
 				break
 			}
 		}						
+		detatch.play()
 	}
 }
 
@@ -193,7 +200,17 @@ export function updateEdges(_edges, _tsunagiNodeID1, _tsunagiNodeID2){
  * @param {*} _camParams 
  */
 export function drawEdges(_p, _tempPlots, _edges, _camParams){	
-	const com = _tempPlots['COM']
+	let com
+	if('COM' in _tempPlots){
+		com = _tempPlots['COM']
+	}else{
+		com = {
+			x: 0,
+			y: 0,
+			z: 0
+		}
+	}
+	
 	const comDist = _p.dist(com.x, com.y, com.z, _camParams.x, _camParams.y, _camParams.z)	
 	const lineWeight = 1.0 + (20.0 * (300.0 - comDist)) / 300.0
 	_p.stroke(255)
@@ -207,26 +224,38 @@ export function drawEdges(_p, _tempPlots, _edges, _camParams){
 }
 
 
+// /**
+//  * 長押しクリックで、tempSHINSHUKUに部位情報をセットする
+//  * @param {Object} _tempSHINSHUKU 
+//  * @param {String} _nearestMarkerID 
+//  * @param {Object} _skeleton 
+//  */
+
 /**
  * 長押しクリックで、tempSHINSHUKUに部位情報をセットする
- * @param {Object} _tempSHINSHUKU 
- * @param {String} _nearestMarkerID 
- * @param {Object} _skeleton 
+ * @param {Object} _p 
+ * @param {} _tempPlots 
+ * @param {} _tempSHINSHUKU 
+ * @param {*} _nearestMarkerID 
+ * @param {*} _camParams 
+ * @param {*} _W 
+ * @param {*} _H 
+ * @param {*} _skeleton 
  */
-export function setTempSHINSHUKU(_p, _tempPlots, _tempSHINSHUKU, _nearestMarkerID, _camParams, _skeleton=skeletonModel){	
+export function setTempSHINSHUKU(_p, _tempPlots, _tempSHINSHUKU, _nearestMarkerID, _camParams, _W, _H, _skeleton=skeletonModel){	
 	const child = _nearestMarkerID
 	if(child == 'COM'){
 		console.log('COMはダメ')
 	}else{
 		// Lv1の部位
 		let parent = null
-		let rate = null//NOTE:1.0のほうがいい？？
-		const lv1Objs = _skeleton.children		
-		lv1Objs.forEach(lv1Obj=>{
-			if(lv1Obj.id == child){
+		let rate = null //NOTE:1.0のほうがいい？？
+		const lv1Objs = _skeleton.children
+		lv1Objs.forEach((lv1Obj) => {
+			if (lv1Obj.id == child) {
 				parent = lv1Obj.parent
 				rate = lv1Obj.rate
-			}else{
+			} else {
 				// Lv２の部位
 				const lv2Objs = lv1Obj.children
 				lv2Objs.forEach((lv2Obj) => {
@@ -268,26 +297,19 @@ export function setTempSHINSHUKU(_p, _tempPlots, _tempSHINSHUKU, _nearestMarkerI
 		const childNode3dPos = [_tempPlots[child].x, _tempPlots[child].y, _tempPlots[child].z]
 		const parentNode3dPos = [_tempPlots[parent].x, _tempPlots[parent].y, _tempPlots[parent].z]
 		console.log('childNode3dPos: ', childNode3dPos)
-		console.log('parentNode3dPos: ', parentNode3dPos)
-		const p2cVec3d = _p.createVector(
-			childNode3dPos[0] - parentNode3dPos[0], 
-			childNode3dPos[1] - parentNode3dPos[1], 
-			childNode3dPos[2] - parentNode3dPos[2], 
-		)
-		_tempSHINSHUKU.p2cVec3d = p2cVec3d				
-
+		console.log('parentNode3dPos: ', parentNode3dPos)		
+		const p2cVec3d = _p.createVector(childNode3dPos[0] - parentNode3dPos[0], childNode3dPos[1] - parentNode3dPos[1], childNode3dPos[2] - parentNode3dPos[2])
+		_tempSHINSHUKU.p2cVec3d = p2cVec3d		
+		
 		// 親ノードと子ノードの2Dキャンバス座標を求め、		
-		const childNode2dPos = get2dPosFrom3dPos(childNode3dPos, _camParams)
-		const parentNode2dPos = get2dPosFrom3dPos(parentNode3dPos, _camParams)
+		const childNode2dPos = get2dPosFrom3dPos(childNode3dPos, _camParams, _W, _H)
+		const parentNode2dPos = get2dPosFrom3dPos(parentNode3dPos, _camParams, _W, _H)						
 
 		// 「親→子」ベクトルをもとめる
-		let p2cVec2d = _p.createVector(
-			childNode2dPos[0] - parentNode2dPos[0],		
-			childNode2dPos[1] - parentNode2dPos[1]
-		)
-		
+		let p2cVec2d = _p.createVector(childNode2dPos[0] - parentNode2dPos[0], childNode2dPos[1] - parentNode2dPos[1])
+
 		_tempSHINSHUKU.p2cVec2d = p2cVec2d
-		console.log('_tempSHINSHUKU: ', _tempSHINSHUKU)
+		console.log('setされたtempSHINSHUKU: ', _tempSHINSHUKU)
 	}	
 }
 
@@ -302,7 +324,7 @@ export function initTempSHINSHUKU(_tempSHINSHUKU){
 	_tempSHINSHUKU.newRate = null
 	_tempSHINSHUKU.p2cVec2d = null
 	_tempSHINSHUKU.p2cVec3d = null
-	console.log('_tempSHINSHUKU: ', _tempSHINSHUKU)
+	console.log('initされたtempSHINSHUKU: ', _tempSHINSHUKU)
 }
 
 /**
@@ -322,6 +344,8 @@ export function updateTempRate(_p, _tempSHINSHUKU){
 	)
 	mouseMove.normalize()
 	p2cVec2d.normalize()
+	console.log('p2cVec2d: ', p2cVec2d)
+	console.log('mouseMove: ', mouseMove)
 	// （2) p2cVecとマウスムーブの、両者の内積をとる		
 	const dot = p2cVec2d.dot(mouseMove)
 	console.log('dot: ', dot)
