@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<LoginUI v-if="memberDocData == null" />
+		<LoginUI v-if="memberDocData == null || memberDocData == undefined" />
 		<!-- {{ memberDocData }} -->
 		<h2 class="my-10">{{ userName }}</h2>
 		<v-container class="my-10">
@@ -27,7 +27,7 @@
 			</v-row>
 		</v-container>
 		<!-- <v-divider></v-divider> -->
-		<v-card class="mx-auto" max-width="500">
+		<v-card v-if="memberDocData" class="mx-auto" max-width="500">
 			<v-card-title> My Plots </v-card-title>
 			<v-card-text>
 				<v-list>
@@ -48,13 +48,13 @@
 <script>
 import { updateMemberDoc, getDataDocData } from '@/modules/firestoreUtils'
 import { /* downloadImageFromMembers */ uploadImage2Members, deleteImage, downloadImageFromMembers } from '@/modules/storage'
-// import LoginUI from '@/components/LoginUI.vue'
+import LoginUI from '@/components/LoginUI.vue'
 
 export default {
 	name: 'HomeView',
 	// SECTION:コンポーネント
 	components: {
-		// LoginUI,
+		LoginUI,
 	},
 	// SECTION:変数
 	data() {
@@ -154,11 +154,15 @@ export default {
 	created: async function () {
 		this.memberDocData = this.$memDocData
 		console.log('memberDocData@MyPage: ', this.memberDocData)
-		this.photoURL =
+		if(this.memberDocData){
+			this.photoURL =
 			this.memberDocData.photoURL != null
 				? this.memberDocData.photoURL
 				: 'https://firebasestorage.googleapis.com/v0/b/karakuri-2eee3.appspot.com/o/members%2F20200501_noimage.png?alt=media&token=580ec63c-fe20-4308-aac3-431f93c5517b'
-		this.userName = this.memberDocData.displayName != null ? this.memberDocData.displayName : this.memberDocData.email
+			this.userName = this.memberDocData.displayName != null ? this.memberDocData.displayName : this.memberDocData.email
+
+		}
+		
 	},
 	mounted: async function () {},
 }

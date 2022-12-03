@@ -28,6 +28,7 @@ async function init() {
 			}).$mount('#app')
 		} else {
 			console.log('未ログイン状態です')
+			Vue.prototype.$memDocData = null
 			new Vue({
 				router,
 				vuetify,

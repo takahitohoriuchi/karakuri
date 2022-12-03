@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<h1>HOME</h1>
-		<LoginUI v-if="memberDocData == null" />
+		<LoginUI v-if="memberDocData == null || memberDocData == undefined" />
 	</div>
 </template>
 
